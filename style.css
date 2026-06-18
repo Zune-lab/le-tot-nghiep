@@ -82,7 +82,7 @@ body::before {
 }
 
 .y2k-sticker {
-    position: absolute; top: 3%; right: 10vw;
+    position: absolute; top: 80px; right: 8vw;
     background: var(--alert-yellow); color: var(--navy-black);
     padding: 20px; border-radius: 50%; border: 4px solid var(--navy-black);
     text-align: center; line-height: 1.1; font-size: 1.5rem;
@@ -90,23 +90,30 @@ body::before {
 }
 
 .graffiti-tag { position: absolute; -webkit-text-stroke: 3px var(--navy-black); text-transform: uppercase; text-shadow: 6px 6px 0px var(--navy-black); }
-.graf-1 { top: 12%; left: 16vw; transform: rotate(-20deg); font-size: 3rem; color: var(--hot-pink); }
-.graf-2 { top: 42%; right: 4vw; transform: rotate(15deg); font-size: 4rem; color: var(--neon-green); }
+.graf-1 { top: 220px; left: 12vw; transform: rotate(-20deg); font-size: 3rem; color: var(--hot-pink); }
+.graf-2 { top: 500px; right: 5vw; transform: rotate(15deg); font-size: 4rem; color: var(--neon-green); }
 
 .doodle { position: absolute; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; fill: none; filter: drop-shadow(4px 4px 0px var(--navy-black)); }
-.doodle-crown { width: 140px; top: 28%; left: 8vw; transform: rotate(-15deg); stroke: var(--alert-yellow); }
-.doodle-star { width: 120px; top: 65%; right: 7vw; transform: rotate(20deg); stroke: var(--hot-pink); }
-.doodle-arrow { width: 120px; top: 35%; right: 20vw; transform: rotate(-30deg); stroke: var(--bright-orange); }
-.doodle-x { width: 80px; top: 72%; left: 10vw; transform: rotate(10deg); stroke: var(--alert-red); }
-.doodle-smiley { width: 120px; top: 86%; left: 6vw; transform: rotate(-15deg); stroke: var(--electric-purple); }
-.doodle-lightning { width: 90px; top: 52%; left: 5vw; transform: rotate(15deg); stroke: var(--alert-yellow); fill: var(--alert-yellow); } 
-.doodle-zigzag { width: 110px; top: 88%; right: 10vw; transform: rotate(-5deg); stroke: var(--neon-green); }
+.doodle-crown { width: 140px; top: 100px; left: 8vw; transform: rotate(-15deg); stroke: var(--alert-yellow); }
+.doodle-star { width: 120px; top: 900px; right: 6vw; transform: rotate(20deg); stroke: var(--hot-pink); }
+.doodle-arrow { width: 120px; top: 380px; right: 18vw; transform: rotate(-30deg); stroke: var(--bright-orange); }
+.doodle-x { width: 80px; top: 800px; left: 8vw; transform: rotate(10deg); stroke: var(--alert-red); }
+.doodle-smiley { width: 120px; top: 1150px; left: 6vw; transform: rotate(-15deg); stroke: var(--electric-purple); }
+.doodle-lightning { width: 90px; top: 650px; left: 5vw; transform: rotate(15deg); stroke: var(--alert-yellow); fill: var(--alert-yellow); } 
+.doodle-zigzag { width: 110px; top: 1100px; right: 8vw; transform: rotate(-5deg); stroke: var(--neon-green); }
 
-.photo-sticker { position: absolute; width: 160px; height: 180px; object-fit: cover; border: 4px solid var(--white); box-shadow: 6px 6px 0 var(--navy-black); }
-.sticker-1 { top: 8%; left: 2vw; transform: rotate(-10deg); }
-.sticker-2 { top: 55%; right: 2vw; width: 140px; height: 140px; border-radius: 50%; transform: rotate(12deg); }
-.sticker-3 { top: 80%; left: 2vw; transform: rotate(-6deg); }
-.sticker-4 { top: 22%; right: 3vw; transform: rotate(8deg); }
+/* Mặc định trên PC sẽ ẩn nón tốt nghiệp */
+.doodle-grad-cap { display: none; }
+
+.photo-sticker { 
+    position: absolute; height: 200px; width: auto; object-fit: contain; z-index: 3;
+    filter: drop-shadow(3px 0 0 var(--white)) drop-shadow(0 3px 0 var(--white)) drop-shadow(-3px 0 0 var(--white)) drop-shadow(0 -3px 0 var(--white)) drop-shadow(6px 6px 0px var(--navy-black));
+}
+
+.sticker-1 { top: 360px; left: 4vw; height: 230px; transform: rotate(-12deg); } 
+.sticker-2 { top: 680px; right: 2vw; height: 210px; transform: rotate(12deg); }
+.sticker-3 { top: 950px; left: 2vw; height: 220px; transform: rotate(-6deg); }
+.sticker-4 { top: 220px; right: 3vw; height: 240px; transform: rotate(8deg); }
 
 /* ==================================================
 4. CROSSHAIRS & HERO UI
@@ -141,12 +148,27 @@ body::before {
 .sub-script { font-size: 2.8rem; color: var(--sky-blue); text-shadow: 3px 3px 0 var(--navy-black), -1px -1px 0 var(--white); transform: rotate(-6deg) translateY(-5px); }
 
 /* ==================================================
-5. BENTO GRID & FORM
+5. BENTO GRID, FORM & PEEKING STICKERS
 ================================================== */
 .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 24px; position: relative; z-index: 10; }
 
 .bento-card { background: var(--white); border: var(--border-thick); border-radius: 8px; box-shadow: var(--shadow-solid); padding: 30px; transition: all 0.15s; position: relative; }
 .bento-card:hover { transform: translate(-4px, -4px) rotate(-1deg); box-shadow: var(--shadow-solid-hover); z-index: 11; }
+
+/* STICKERS LÚ RA KHỎI KHUNG (PEEKING STICKERS) */
+.peek-sticker {
+    position: absolute;
+    border: 3px solid var(--navy-black);
+    padding: 4px 14px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    box-shadow: 4px 4px 0 var(--navy-black);
+    z-index: -1; /* Luôn nằm sau lưng thẻ bento-card */
+    pointer-events: none; /* Không cản trở người dùng click */
+}
+.peek-1 { top: -15px; left: -15px; transform: rotate(-15deg); background: var(--hot-pink); color: var(--white); }
+.peek-2 { top: -18px; right: -20px; transform: rotate(15deg); background: var(--neon-green); color: var(--navy-black); }
+.peek-3 { bottom: -20px; left: -15px; transform: rotate(-10deg); background: var(--baby-blue); color: var(--navy-black); }
 
 .box-invite { grid-column: 1 / 3; grid-row: 1 / 3; }
 .box-countdown { grid-column: 3 / 5; grid-row: 1 / 2; display: flex; align-items: center; justify-content: center; background: var(--sky-blue); }
@@ -183,25 +205,31 @@ body::before {
 .rsvp-title h3 { font-size: 3rem; line-height: 1.1; color: var(--white); text-shadow: 3px 3px 0 var(--navy-black); }
 .rsvp-title p { font-weight: 900; letter-spacing: 2px; margin-top: 5px; font-size: 1rem; }
 
-.street-form { display: flex; flex-wrap: wrap; gap: 15px; width: 100%; align-items: flex-end; }
+.street-form { display: flex; flex-wrap: nowrap; gap: 15px; width: 100%; align-items: flex-start; }
 .form-group { display: flex; flex-direction: column; }
 .flex-1 { flex: 1; min-width: 80px; }
 .flex-2 { flex: 2; min-width: 150px; }
-.flex-3 { flex: 3; min-width: 180px; }
+.flex-3 { flex: 3; min-width: 180px; } 
+.btn-group { flex-shrink: 0; }
 
-.street-form label { font-size: 0.8rem; font-weight: 900; letter-spacing: 1px; margin-bottom: 8px; }
-.street-form input { background: var(--white); border: var(--border-thick); padding: 14px 15px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; border-radius: 0; outline: none; }
+.hidden-label { visibility: hidden; }
+.street-form label { font-size: 0.8rem; font-weight: 900; letter-spacing: 1px; margin-bottom: 8px; line-height: 1.4; display: block; }
+
+.street-form input, .street-form textarea { 
+    background: var(--white); border: var(--border-thick); padding: 14px 15px; 
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; border-radius: 0; outline: none; 
+    width: 100%; height: 52px;
+}
 .street-form input:focus { box-shadow: 6px 6px 0 var(--navy-black); transform: translate(-2px, -2px); }
 
 .submit-btn {
     background: var(--baby-blue); color: var(--navy-black); border: var(--border-thick);
     padding: 0 25px; font-size: 1.2rem; border-radius: 0; cursor: pointer;
     box-shadow: 6px 6px 0 var(--navy-black); transition: 0.1s; 
-    height: 52px; white-space: nowrap; flex-shrink: 0; 
+    height: 52px; white-space: nowrap; width: 100%; 
 }
 .submit-btn:active { transform: translate(6px, 6px); box-shadow: 0px 0px 0 var(--navy-black); }
-.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.submit-btn[aria-disabled="true"] { opacity: 0.6; cursor: not-allowed; } /* CSS For A11y state */
+.submit-btn:disabled, .submit-btn[aria-disabled="true"] { opacity: 0.6; cursor: not-allowed; } 
 
 /* ==================================================
 6. FOOTER & MODALS (POP-UP)
@@ -232,7 +260,6 @@ body::before {
 .error-modal-style h3 { color: var(--navy-black); text-shadow: none; }
 
 .modal-overlay.active .modal-content { transform: scale(1); }
-
 .modal-content h3 { font-size: 2.2rem; margin-bottom: 15px; text-shadow: 2px 2px 0 var(--white); white-space: nowrap; }
 .modal-content p { font-weight: 600; font-size: 1.1rem; line-height: 1.5; margin-bottom: 25px; }
 
@@ -247,19 +274,40 @@ body::before {
 .error-btn { background: var(--alert-red); box-shadow: 4px 4px 0 var(--navy-black); border-color: var(--navy-black); }
 
 /* ==================================================
-7. RESPONSIVE DESIGN (TỐI ƯU CẢ MOBILE & TABLET)
+7. RESPONSIVE DESIGN (MOBILE)
 ================================================== */
 @media (max-width: 900px) {
-    /* ẨN BỚT YẾU TỐ TO GÂY RỐI */
-    .photo-sticker, .y2k-sticker, .graffiti-tag { display: none; }
+    .global-decorations { z-index: 0; opacity: 0.9; }
+
+    .y2k-sticker, .graffiti-tag, .photo-sticker { display: none; }
     .crosshair { display: none; } 
     .doodle-crown, .doodle-arrow, .doodle-lightning { display: none; }
     
-    /* CHỈ GIỮ LẠI VÀI DOODLE NHỎ ĐIỂM XUYẾT VÀO VÙNG TRỐNG (STREETWEAR VIBE) */
-    .doodle-star { width: 50px; top: 12%; right: 5vw; opacity: 0.6; }
-    .doodle-x { width: 40px; top: 35%; left: 5vw; opacity: 0.6; }
-    .doodle-smiley { width: 60px; top: 60%; right: 5vw; opacity: 0.6; }
-    .doodle-zigzag { width: 70px; top: 85%; left: 5vw; opacity: 0.6; }
+    /* GỌI NÓN TỐT NGHIỆP HIỆN RA VÀ ĐỘI LÊN ĐẦU STICKER-1 */
+    .doodle-grad-cap {
+        display: block !important;
+        position: absolute;
+        width: 48px; 
+        top: 130px;  /* Tăng số lên để nón hạ xuống chạm đầu */
+        left: 70vw;  /* Tăng số lên để nón nhích sang phải */
+        transform: rotate(20deg); 
+        z-index: 2; 
+    }
+
+    .sticker-1 {
+        display: block !important; 
+        top: 150px; 
+        left: 50vw; 
+        width: auto; height: 160px; 
+        transform: rotate(15deg); 
+        opacity: 0.85; 
+        z-index: 1; 
+    }
+
+    .doodle-star { width: 50px; top: 150px; right: 5vw; opacity: 0.6; display: block; }
+    .doodle-x { width: 40px; top: 350px; left: 5vw; opacity: 0.6; display: block; }
+    .doodle-smiley { width: 60px; top: 600px; right: 5vw; opacity: 0.6; display: block; }
+    .doodle-zigzag { width: 70px; top: 850px; left: 5vw; opacity: 0.6; display: block; }
 
     .watermark { font-size: 50vw; top: 20%; }
     .main-name { font-size: 3.2rem; }
@@ -274,7 +322,8 @@ body::before {
     .box-rsvp { flex-direction: column; align-items: flex-start; gap: 20px; }
     .street-form { flex-direction: column; align-items: stretch; gap: 15px; }
     .form-group.flex-1, .form-group.flex-2, .form-group.flex-3 { min-width: 100%; }
-    .submit-btn { width: 100%; height: 55px; margin-top: 5px; }
+    .hidden-label { display: none; } 
+    .submit-btn { margin-top: 5px; }
     
     .timer { gap: 10px; }
     .colon { font-size: 2rem; }

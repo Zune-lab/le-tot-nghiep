@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     // 2. COUNTDOWN TIMER LOGIC
     // =========================================================
-    const targetDate = new Date('August 15, 2026 08:00:00').getTime();
+    const targetDate = new Date('August 2, 2026 08:00:00').getTime();
 
     const updateTimer = () => {
         const now = new Date().getTime();
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTimer();
 
     // =========================================================
-    // 3. RSVP API INTEGRATION (BẢO MẬT & ACCESSIBILITY)
+    // 3. RSVP API INTEGRATION & SMART TEXTAREA
     // =========================================================
     const form = document.getElementById('rsvpForm');
     const successModal = document.getElementById('success-modal');
@@ -57,6 +57,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const guestNamesInput = document.getElementById('guestName');
     const guestMessageInput = document.getElementById('guestMsg');
 
+    // HIỆU ỨNG TỰ PHÌNH TO MƯỢT MÀ KHÔNG ĐẨY FORM
+    if (guestMessageInput) {
+        const autoResize = function() {
+            this.style.height = '52px'; // Luôn reset về 52px để tính toán
+            let newHeight = this.scrollHeight;
+            
+            if (newHeight > 52) {
+                if (newHeight > 130) { // Giới hạn phình tối đa khoảng 4-5 dòng
+                    this.style.height = '130px';
+                    this.style.overflowY = 'auto'; // Tràn quá thì cho cuộn dọc
+                } else {
+                    this.style.height = newHeight + 'px';
+                    this.style.overflowY = 'hidden';
+                }
+            } else {
+                this.style.overflowY = 'hidden';
+            }
+        };
+        guestMessageInput.addEventListener('input', autoResize);
+        setTimeout(() => autoResize.call(guestMessageInput), 0);
+    }
+
     guestCountInput.addEventListener('input', (e) => {
         const count = parseInt(e.target.value);
         if (count > 1) {
@@ -66,8 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // MÃ HOÁ WEBHOOK BẰNG BASE64 ĐỂ TRÁNH BOT SCRAPING DỮ LIỆU
-    // Lưu ý: Giải pháp này cản được bot cơ bản. Thực tế tốt nhất nên gọi qua một Serverless Function/Backend.
     const ENCODED_WEBHOOK_URL = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNjc1NDc3MTU3MzIxNTMxMy9oVW82dzAySTRhQ05mNUxUVFJ0NjlUSGNBNzUwWDBXaVlObERWOG5IQjVKNlozVEVVMTVyMF9TZENxbk9uUXNZRTdzeQ==';
     const DISCORD_WEBHOOK_URL = atob(ENCODED_WEBHOOK_URL);
 
@@ -83,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalBtnText = btnSubmit.innerText;
             btnSubmit.innerText = "ĐANG CHECK...";
             btnSubmit.disabled = true;
-            btnSubmit.setAttribute('aria-disabled', 'true'); // Thuộc tính cho Screen Reader
+            btnSubmit.setAttribute('aria-disabled', 'true'); 
 
             const count = guestCountInput.value;
             const countNumber = Number(count);
@@ -96,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnSubmit.removeAttribute('aria-disabled');
             };
 
-            // VALIDATION KHÁCH MỜI
             if (Number.isNaN(countNumber) || countNumber < 1) {
                 showCustomAlert("Số lượng homie phải lớn hơn hoặc bằng 1!");
                 resetSubmitButton();
@@ -152,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const textMessage = `🚀 **NEW RSVP | GRADUATION DROP 2026** 🚀\n\n` +
                                 `👥 **Số lượng:** ${count} người\n` +
                                 `👤 **Tên khách:** ${allNamesStr}\n` +
-                                `💬 **Shoutout:** ${msg}\n` +
+                                `💬 **Kỉ niệm/Shoutout:** ${msg}\n` +
                                 `🕒 **Thời gian log:** ${dateStr}`; 
 
             try {
@@ -166,6 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     successModal.classList.add('active'); 
                     form.reset(); 
                     guestNamesInput.placeholder = 'Tên gì ghi vô...';
+                    if (guestMessageInput) {
+                        guestMessageInput.style.height = '52px';
+                        guestMessageInput.style.overflowY = 'hidden';
+                    }
                 } else {
                     showCustomAlert("Lỗi Server: Discord từ chối nhận tin nhắn của bạn.");
                 }
@@ -178,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Đóng Modal khi bấm OK
     window.closeModal = (modalId) => {
         const targetModal = document.getElementById(modalId);
         if(targetModal) targetModal.classList.remove('active');

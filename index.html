@@ -34,10 +34,18 @@
         <svg viewBox="0 0 100 100" class="doodle doodle-lightning"><path d="M55 10 L25 50 L50 50 L45 90 L80 40 L50 40 Z"/></svg>
         <svg viewBox="0 0 100 100" class="doodle doodle-zigzag"><polyline points="10,50 30,20 50,80 70,20 90,50"/></svg>
 
-        <img src="https://images.unsplash.com/photo-1528605105345-5344ea20e269?q=80&w=300" alt="Sticker 1" class="photo-sticker sticker-1">
-        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=300" alt="Sticker 2" class="photo-sticker sticker-2">
-        <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=300" alt="Sticker 3" class="photo-sticker sticker-3">
-        <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=300" alt="Sticker 4" class="photo-sticker sticker-4">
+        <svg viewBox="0 0 100 100" class="doodle doodle-grad-cap">
+            <path d="M10,45 L50,25 L90,45 L50,65 Z" fill="#0B111A" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M25,53 L25,75 C25,85 75,85 75,75 L75,53" fill="#0B111A" stroke="#FFFFFF" stroke-width="4" />
+            <path d="M50,45 L80,60 L80,85" stroke="#FFEA00" stroke-width="4" fill="none" stroke-linecap="round" />
+            <circle cx="80" cy="85" r="4" fill="#FFEA00" />
+            <circle cx="50" cy="45" r="3" fill="#FFEA00" />
+        </svg>
+
+        <img src="pic/main.webp" alt="Sticker 1" class="photo-sticker sticker-1">
+        <img src="pic/main2.webp" alt="Sticker 2" class="photo-sticker sticker-2">
+        <img src="pic/main3.webp" alt="Sticker 3" class="photo-sticker sticker-3">
+        <img src="pic/main4.webp" alt="Sticker 4" class="photo-sticker sticker-4">
     </div>
 
     <div class="container">
@@ -65,6 +73,8 @@
         <main class="bento-grid">
             
             <div class="bento-card box-invite">
+                <div class="peek-sticker peek-1 bubble-font">WASSUP!</div>
+                
                 <div class="card-header">
                     <h3>THE INVITATION</h3>
                     <div class="barcode">||||| 2026 |||||</div>
@@ -89,6 +99,8 @@
             </div>
 
             <div class="bento-card box-countdown">
+                <div class="peek-sticker peek-2 bubble-font">⏳ TICK TOCK</div>
+
                 <div class="timer">
                     <div class="time-col">
                         <span id="days" class="bubble-font">00</span>
@@ -122,6 +134,8 @@
             </div>
 
             <div class="bento-card box-rsvp">
+                <div class="peek-sticker peek-3 bubble-font">✨ SLAYYY</div>
+
                 <div class="rsvp-title">
                     <h3 class="bubble-font">RSVP</h3>
                     <p>YOU IN OR NAH?</p>
@@ -135,11 +149,16 @@
                         <label>TÊN CỦA BẠN</label>
                         <input type="text" id="guestName" placeholder="Tên gì ghi vô..." required>
                     </div>
+                    
                     <div class="form-group flex-3">
-                        <label>SHOUTOUT (TÙY CHỌN)</label>
-                        <input type="text" id="guestMsg" placeholder="Gửi lời chúc gang gang...">
+                        <label>KỈ NIỆM TỤI MÌNH?</label>
+                        <input type="text" id="guestMsg" placeholder="Ghi vài dòng kỉ niệm vào đây nha...">
                     </div>
-                    <button type="submit" class="submit-btn bubble-font" aria-disabled="false">I'M IN 🚀</button>
+
+                    <div class="form-group btn-group">
+                        <label class="hidden-label">&nbsp;</label>
+                        <button type="submit" class="submit-btn bubble-font" aria-disabled="false">I'M IN 🚀</button>
+                    </div>
                 </form>
             </div>
 
@@ -148,7 +167,7 @@
 
     <footer class="street-footer">
         <p>Exclusively crafted for <span class="bubble-font">Bảo Anh</span>'s Graduation</p>
-        <p>Designed by <span class="bubble-font">Vương</span></p>
+        <p>Designed by <span class="bubble-font">Vương Nguyễn</span></p>
     </footer>
 
     <div class="modal-overlay" id="success-modal">
