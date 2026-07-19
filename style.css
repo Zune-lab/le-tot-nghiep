@@ -175,7 +175,7 @@ body::before {
 .note-cat-left { bottom: -20px; left: -60px; width: 85px; --tilt: -12deg; z-index: 7; }
 /* 2 Bé lấp chỗ trống khu vực thời gian */
 .note-bow-right { bottom: 40px; right: -32px; width: 60px; --tilt: -35deg; z-index: 7; }
-.details-monkey-left { top: 55px; left: -165px; width: 130px; --tilt: -14deg; z-index: 7; }
+.details-monkey-left { top: 63px; left: -165px; width: 130px; --tilt: -14deg; z-index: 7; }
 .details-dog-right { bottom: -65px; right: -150px; width: 135px; --tilt: 6deg; z-index: 7; }
 .details-text-right { top: -5px; right: -115px; width: 95px; --tilt: 8deg; z-index: 8; }
 .agenda-pin { top: -20px; left: -20px; width: 40px; --tilt: -55deg; z-index: 10; }
@@ -430,7 +430,7 @@ body::before {
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 .msg-hint {
     font-family: 'Patrick Hand', cursive; font-size: 0.8rem; font-style: italic;
-    line-height: 1.3; color: rgba(44, 53, 57, 0.5); order: 1;
+    line-height: 1.3; color: #A67F62; order: 1;
 }
 .hint-spacer { visibility: hidden; }
 .form-group input, .form-group textarea { order: 2; }
@@ -536,7 +536,7 @@ body::before {
     
     /* Ẩn bớt web sticker rườm rà, còn chữ ký thì thu nhỏ lại để hiện trên mobile */
     .person-web-right { display: none !important; }
-    .signature-right { width: 60px; height: 37px; top: 52px; left: 225px; bottom: auto; right: auto; }
+    .signature-right { width: 60px; height: 37px; top: 40px; left: 215px; bottom: auto; right: auto; }
 
     /* Sao góc trên + trái tim cạnh ảnh chính - thu nhỏ và kéo vào để không bị cắt mất bởi overflow:hidden */
     .name-stars-left { width: 18px; top: 55px; left: -22px; right: auto; z-index: 5; --tilt: -28deg; }
@@ -587,10 +587,10 @@ body::before {
 
     /* Quanh Ransom Note */
     .note-cat-left { width: 50px; bottom: -10px; left: -10px; }
-    .note-bow-right { width: 40px; top: 23px; right: -15px; } 
+    .note-bow-right { width: 40px; top: 30px; right: -15px; } 
     
     /* Quanh Details (To hơn, 1 trên 1 dưới, tránh né chữ) */
-    .details-monkey-left { width: 80px; top: -10px; left: -78px; --tilt: -14deg; } 
+    .details-monkey-left { width: 80px; top: 6px; left: -78px; --tilt: -14deg; } 
     .details-dog-right { width: 100px; bottom: -30px; right: -100px; top: auto; --tilt: 5deg; } 
     .details-text-right { width: 58px; top: 2px; right: -38px; }
     .agenda-pin { width: 25px; top: -10px; left: 0px; }
