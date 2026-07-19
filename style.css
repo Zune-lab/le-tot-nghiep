@@ -533,7 +533,7 @@ body::before {
     .agenda-pin { width: 25px; top: -10px; left: 0px; }
 
     /* Đẩy chữ "by Banh Đòn" xuống giữa tí */
-    .event-credit { margin-top: 25px; text-align: center; }
+    .event-credit { margin-top: 45px; text-align: center; }
 
     /* Timeline dọc trên mobile */
     .box-agenda { padding: 25px 20px 30px 20px; }
