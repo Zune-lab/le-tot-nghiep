@@ -1,0 +1,570 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Patrick+Hand&family=Space+Grotesk:wght@500;700;900&family=Special+Elite&display=swap');
+
+:root {
+    --cream-bg: #EFECE3;
+    --royal-blue: #5B7B9C;
+    --sky-blue: #A5C0D6;
+    --charcoal-black: #2C3539;
+    --white: #FFFFFF;
+    --border-thick: 1px solid rgba(44, 53, 57, 0.4); 
+    --shadow-solid: 2px 4px 12px rgba(0, 0, 0, 0.06);
+    --shadow-solid-hover: 4px 8px 20px rgba(0, 0, 0, 0.1);
+
+    /* Dùng cho khu Photo Drop Zone */
+    --navy-black: var(--charcoal-black);
+    --baby-blue: var(--sky-blue);
+    --hot-pink: #C97B84;
+    --neon-green: #7FA98B;
+    --alert-red: #C1666B;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* BUG: dùng ở 11 chỗ (số đếm ngược, nút submit, tiêu đề RSVP...) nhưng chưa từng
+   có rule nào định nghĩa - giờ thêm vào, khớp với font bo tròn của .balloon-name */
+.bubble-font { font-family: 'Patrick Hand', 'Caveat', cursive; font-weight: 700; }
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background-color: var(--cream-bg);
+    color: var(--charcoal-black);
+    min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; position: relative;
+}
+
+/* CUSTOM SCROLLBAR */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--cream-bg); }
+::-webkit-scrollbar-thumb { background: var(--royal-blue); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--charcoal-black); }
+
+body::before {
+    content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1;
+}
+
+.street-grid-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: radial-gradient(var(--royal-blue) 1px, transparent 1px);
+    background-size: 32px 30px; opacity: 0.15; z-index: 0;
+}
+
+.bg-parallax-wrapper {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none; z-index: -1; overflow: hidden;
+}
+
+.watermark {
+    position: absolute; top: 40%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-8deg) scaleY(1.15) skewX(-10deg);
+    font-size: 24vw; font-weight: 900; color: rgba(91, 123, 156, 0.08); 
+    white-space: nowrap; user-select: none;
+}
+
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
+
+.scrapbook-hero {
+    position: relative; background-color: #FDFBF7;
+    background-image: linear-gradient(#e1dada 1px, transparent 1px); background-size: 100% 2.5rem; 
+    border: var(--border-thick); border-radius: 4px; box-shadow: 2px 5px 15px rgba(0,0,0,0.05);
+    padding: 100px 20px 90px 20px; margin-bottom: 40px; text-align: center; overflow: hidden;
+}
+
+/* ==========================================================================
+   VIỀN STICKER TRẮNG (DÙNG DROP-SHADOW KÉP)
+   ========================================================================== */
+.hero-decor:not(.signature-right), .bento-decor, .bento-person, .main-person, .scatter-item {
+    border: none !important;
+    box-shadow: none !important;
+    filter: 
+        drop-shadow(2px 0px 0px #ffffff) 
+        drop-shadow(-2px 0px 0px #ffffff) 
+        drop-shadow(0px 2px 0px #ffffff) 
+        drop-shadow(0px -2px 0px #ffffff) 
+        drop-shadow(4px 4px 0px rgba(0,0,0,0.15)) !important;
+}
+
+.hero-decor, .bento-decor {
+    position: absolute; z-index: 3; pointer-events: none; 
+    transition: transform 0.3s ease; animation: stickerFloat 4.5s ease-in-out infinite;
+}
+.hero-decor:nth-of-type(2n) { animation-duration: 5.5s; animation-delay: -1.2s; }
+.hero-decor:nth-of-type(3n) { animation-duration: 3.8s; animation-delay: -2.4s; }
+.hero-decor:nth-of-type(4n) { animation-duration: 6.2s; animation-delay: -0.6s; }
+.bento-decor:nth-of-type(2n) { animation-duration: 5s; animation-delay: -1.8s; }
+
+/* Các sticker không phải người ở đầu trang: đứng yên, không animation/transform */
+.name-stars-left,
+.signature-right, .person-heart-left, .person-stars-left, .person-web-right,
+.note-cat-left {
+    animation: none !important;
+    transform: none !important;
+}
+
+/* Đứng yên nhưng vẫn giữ nghiêng tĩnh riêng cho từng sticker */
+.disco-left { animation: none !important; transform: rotate(-25deg) !important; }
+.disco-right-bottom { animation: none !important; transform: rotate(30deg) !important; }
+.flowers-right { animation: none !important; transform: rotate(40deg) !important; }
+
+/* Nơ: đứng yên, không animation, nghiêng trái cố định trên cả PC lẫn mobile */
+.note-bow-right {
+    animation: none !important;
+    transform: rotate(-40deg) !important;
+}
+
+@keyframes stickerFloat { 0%, 100% { transform: rotate(var(--tilt, 0deg)) translateY(0); } 50% { transform: rotate(var(--tilt, 0deg)) translateY(-8px); } }
+
+/* ==========================================================================
+   ẢNH RẢI RÁC KHẮP BACKGROUND THÀNH 2 BÊN LỀ
+   ========================================================================== */
+.scatter-item {
+    position: absolute;
+    animation: stickerFloat 6s ease-in-out infinite;
+    opacity: 0.92;
+    pointer-events: auto;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 4;
+}
+.scatter-item:hover { transform: scale(1.15) !important; z-index: 50; }
+
+.sc-new-1 { top: 27%; left: 1.5%; width: 85px; --tilt: -10deg; animation-delay: -1s; }
+.sc-new-2 { bottom: 5%; left: 2%; width: 90px; --tilt: 12deg; animation-delay: -2.5s; }
+.sc-new-3 { top: 32%; right: 1.5%; width: 80px; --tilt: 8deg; animation-delay: -0.5s; }
+
+/* TỌA ĐỘ STICKER VÀ VỆ TINH */
+.disco-left { top: -200px; left: -100px; width: 300px; --tilt: -25deg; }
+.flowers-right { top: -10px; right: -50px; width: 220px; --tilt: 40deg; }
+.disco-right-bottom { top: 50px; right: -15px; width: 120px; --tilt: 30deg; }
+.name-stars-left { top: -45px; left: -20px; width: 38px; --tilt: -15deg; z-index: 5; }
+.invite-effect { top: 5px; left: -50px; width: 80px; --tilt: -140deg; z-index: 6; }
+/* ==========================================================================
+   CHỮ KÝ BẰNG MASK-IMAGE (ĐỔI MÀU SIÊU TỐC)
+   ========================================================================== */
+.signature-right { 
+    top: 103px; 
+    left: 415px; 
+    width: 110px; 
+    height: 67px;
+    --tilt: -10deg; 
+    border: none !important;
+    box-shadow: none !important;
+    
+    /* 1. Nhúng bức ảnh làm mặt nạ cắt nền */
+    -webkit-mask: url('signature.png') no-repeat center / contain;
+    mask: url('signature.png') no-repeat center / contain;
+    
+    /* 2. 🚀 BÚT PHÉP THUẬT Ở ĐÂY: Thích màu gì, gõ màu đó! */
+    background-color: var(--royal-blue); 
+    /* Thử vài màu khác xem sao: var(--hot-pink), var(--charcoal-black), #FF5733... */
+    
+    /* 3. Bóng đổ nhẹ cho chữ ký nổi bật trên mặt giấy */
+    filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.15));
+}
+.person-heart-left { top: 40%; left: -60px; width: 55px; --tilt: -20deg; }
+.person-stars-left { top: auto; left: auto; right: -75px; bottom: 20%; width: 40px; --tilt: 15deg; }
+.person-web-right { bottom: 8%; right: -30px; width: 65px; --tilt: -5deg; }
+.note-cat-left { bottom: -20px; left: -60px; width: 85px; --tilt: -12deg; z-index: 7; }
+/* 2 Bé lấp chỗ trống khu vực thời gian */
+.note-bow-right { bottom: 40px; right: -32px; width: 60px; --tilt: -35deg; z-index: 7; }
+.details-monkey-left { top: 55px; left: -165px; width: 130px; --tilt: -14deg; z-index: 7; }
+.details-dog-right { bottom: -65px; right: -150px; width: 135px; --tilt: 6deg; z-index: 7; }
+.details-text-right { top: -5px; right: -115px; width: 95px; --tilt: 8deg; z-index: 8; }
+.agenda-pin { top: -20px; left: -20px; width: 40px; --tilt: -55deg; z-index: 10; }
+
+/* ẢNH VỆ TINH BAY QUANH ẢNH MAIN */
+.main-float-1 { width: 120px; top: -32px; left: -105px; --tilt: -15deg; z-index: 6; }
+.main-float-2 { width: 210px; top: 25px; right: -100px; --tilt: 14deg; z-index: 6; }
+.main-float-3 { width: 110px; bottom: -15px; left: -75px; --tilt: 10deg; z-index: 6; }
+.main-float-1:hover, .main-float-2:hover, .main-float-3:hover { transform: scale(1.15) !important; z-index: 50; }
+
+/* CÁC STICKER NGƯỜI NẰM TRONG BENTO BOX */
+.bento-person {
+    position: absolute;
+    z-index: 99 !important; 
+    transition: transform 0.3s ease;
+    will-change: transform; 
+    pointer-events: none;
+}
+.bento-person:hover { transform: scale(1.1) rotate(5deg); }
+.bento-card:hover .bento-person { transform: scale(1.1) rotate(5deg); }
+
+.bento-p1 { width: 150px; top: 15px; left: -0px; transform: rotate(10deg); }
+.bento-p2 { width: 140px; bottom: 15px; right: -20px; transform: rotate(-5deg); }
+.bento-p3 { width: 220px; top: -75px; right: 20px; transform: rotate(-8deg); }
+
+/* HERO SECTION COMPONENTS */
+.handwritten-invite {
+    font-family: 'Patrick Hand', 'Caveat', cursive; 
+    font-size: 1.6rem; font-style: italic; color: var(--charcoal-black); 
+    line-height: 2.5rem; margin: -50px auto 15px auto; max-width: 340px; transform: rotate(-1deg); 
+    position: relative; z-index: 10; text-align: center;
+}
+
+.balloon-name-container { position: relative; display: block; width: fit-content; margin: 0 auto -5px auto; z-index: 4; }
+.balloon-name-img {
+    width: 420px;
+    aspect-ratio: 1180 / 303;
+    display: block;
+    margin: 0 auto;
+    transform: rotate(-2deg);
+    filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.15));
+}
+.main-person-container { position: relative; display: flex; width: fit-content; justify-content: center; margin: -10px auto 0 auto; z-index: 5; }
+.main-person { max-width: 280px; height: auto; transform: rotate(-2deg); transition: transform 0.3s ease; }
+.main-person:hover { transform: scale(1.05) rotate(-2deg); }
+.nice-bubble-css {
+    position: absolute; top: 20px; right: -30px; z-index: 6; background: #FFEA80;
+    color: var(--charcoal-black); border: 3px solid var(--charcoal-black);
+    border-radius: 50% 50% 50% 6px; padding: 10px 14px; font-size: 0.95rem;
+    --tilt: 15deg; box-shadow: 3px 3px 0px rgba(0,0,0,0.15); animation: stickerFloat 4.5s ease-in-out infinite; border: 3px solid var(--charcoal-black) !important;
+}
+
+.ransom-note-container { position: relative; display: flex; width: fit-content; flex-direction: column; align-items: center; gap: 10px; margin: 25px auto; z-index: 6; }
+.ransom-word { display: flex; justify-content: center; gap: 4px; }
+.ransom-letter {
+    display: inline-block; width: 42px; height: 52px; line-height: 48px; font-size: 2.2rem; font-weight: 900;
+    text-align: center; border: 2px solid var(--charcoal-black); box-shadow: 3px 3px 0px rgba(0,0,0,0.12);
+}
+.font-serif { font-family: 'Special Elite', Georgia, serif; }
+.font-sans { font-family: 'Space Grotesk', sans-serif; }
+.font-mono { font-family: 'Courier Prime', monospace; }
+.bg-dark { background-color: var(--charcoal-black); color: var(--white); }
+.bg-light { background-color: var(--white); color: var(--charcoal-black); }
+.ransom-letter:nth-child(odd) { transform: rotate(-4deg) translateY(-2px); }
+.ransom-letter:nth-child(even) { transform: rotate(3deg) translateY(2px); }
+
+.event-details-card { position: relative; display: block; width: fit-content; margin: 15px auto 0 auto; font-family: 'Space Grotesk', sans-serif; z-index: 6; }
+.event-date { font-size: 1.8rem; font-weight: 900; letter-spacing: 1px; }
+.event-time { font-size: 4rem; font-weight: 900; color: var(--royal-blue); line-height: 1; margin: 10px 0; }
+.event-location { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; }
+.event-invite { font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 2rem; margin-top: 15px; }
+
+/* ==========================================================================
+   BENTO GRID VÀ CÁC THẺ MỤC LỤC 
+   ========================================================================== */
+.bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 20px; }
+.bento-card { 
+    background: #FFFDF5; border: var(--border-thick); border-radius: 2px; box-shadow: var(--shadow-solid); 
+    padding: 25px; transition: all 0.3s ease; position: relative; 
+    animation: cardFadeUp 0.6s ease-out both; 
+    font-family: 'Patrick Hand', 'Caveat', cursive; 
+    will-change: transform, opacity; 
+}
+.bento-card:hover { transform: translate(-4px, -4px); box-shadow: var(--shadow-solid-hover); }
+
+@keyframes cardFadeUp { 
+    0% { opacity: 0; transform: translateY(30px); } 
+    100% { opacity: 1; transform: translateY(0); } 
+}
+.box-countdown { animation-delay: 0.1s; }
+.box-contact { animation-delay: 0.2s; }
+.box-agenda { animation-delay: 0.3s; }
+.box-rsvp { animation-delay: 0.4s; }
+
+.button-sticker { bottom: -35px; right: -15px; width: 45px; --tilt: -10deg; }
+.exclamation-sticker { top: -25px; left: 15px; width: 35px; --tilt: 12deg; }
+.star-sticker { top: -25px; left: -15px; width: 60px; --tilt: -25deg; }
+.notepad-sticker { bottom: -40px; right: -15px; width: 50px; --tilt: 15deg; }
+.countdown-rocket { top: -22px; right: -12px; width: 55px; --tilt: 18deg; z-index: 5; }
+.rsvp-cat { bottom: -20px; left: -18px; width: 62px; --tilt: -8deg; z-index: 5; }
+
+/* 🚀 ĐÓNG ĐINH THỨ TỰ LỚP (Z-INDEX) CỐ ĐỊNH CHO TỪNG KHUNG */
+.box-countdown { grid-column: 1 / 3; display: flex; align-items: center; justify-content: center; background: var(--sky-blue); z-index: 30 !important; }
+.box-contact { grid-column: 3 / 4; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20 !important; }
+.box-agenda { grid-column: 1 / 4; display: flex; flex-direction: column; justify-content: center; z-index: 10 !important; }
+.box-rsvp { grid-column: 1 / 4; background: #FFFDF5; z-index: 40 !important; }
+
+.timer { display: flex; gap: 15px; align-items: center; }
+.colon { font-size: 2.5rem; font-weight: 900; margin-bottom: 20px; color: var(--white); font-family: 'Space Grotesk', sans-serif; }
+.time-col { display: flex; flex-direction: column; align-items: center; }
+.time-col span { font-size: 3.5rem; color: var(--white); line-height: 1; text-shadow: 3px 3px 0 var(--charcoal-black); font-family: 'Space Grotesk', sans-serif;}
+.time-col small { font-weight: 700; font-size: 0.75rem; margin-top: 5px; background: var(--white); padding: 2px 8px; border: 2px solid var(--charcoal-black); font-family: 'Space Grotesk', sans-serif; }
+
+.contact-box { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; margin: 10px auto 0 auto; width: fit-content; }
+.contact-box a { font-size: 1.4rem; }
+/* ==========================================================
+   Icon Chó & Khỉ trước Số Điện Thoại
+   ========================================================== */
+.phone-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Khoảng cách từ sticker tới số đt */
+    margin-top: 5px;
+    margin-left: -35px;
+}
+
+.phone-icon {
+    width: 38px; /* Kích thước icon */
+    /* Mượn lại bùa chú viền trắng bám sát dáng người */
+    filter: 
+        drop-shadow(2px 0px 0px #ffffff) 
+        drop-shadow(-2px 0px 0px #ffffff) 
+        drop-shadow(0px 2px 0px #ffffff) 
+        drop-shadow(0px -2px 0px #ffffff) 
+        drop-shadow(2px 2px 0px rgba(0,0,0,0.15));
+    transition: transform 0.3s ease;
+}
+
+.dog-icon { transform: rotate(-10deg); }
+.monkey-icon { transform: rotate(15deg); }
+
+/* Hiệu ứng: Khi lướt chuột vào SĐT, 2 bé sẽ nhún nhảy */
+.phone-wrapper:hover .phone-icon { transform: scale(1.15) rotate(0deg); }
+.phone-link {
+    font-size: 1.8rem; color: var(--royal-blue); text-decoration: none; font-weight: 900; margin-top: 5px; display: inline-block; position: relative; transition: color 0.2s ease, transform 0.2s ease;
+}
+.phone-link::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 100%; height: 3px; background: var(--charcoal-black); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
+.phone-link:hover { color: var(--charcoal-black); transform: translateY(-2px); }
+.phone-link:hover::after { transform: scaleX(1); }
+
+.box-agenda { padding: 30px 30px 85px 30px; }
+
+.agenda-head { margin-bottom: 6px; }
+.agenda-title {
+    font-size: 1.7rem; margin-top: 2px; color: var(--charcoal-black);
+    transform: rotate(-1deg); display: inline-block;
+}
+
+.timeline {
+    list-style: none; margin-top: 40px; display: flex; align-items: flex-start; justify-content: space-between;
+    position: relative; padding: 0 4px; gap: 14px;
+    counter-reset: agenda-step;
+}
+.timeline::before {
+    content: ''; position: absolute; top: 0; left: 7%; right: 7%; height: 0;
+    border-top: 3px dashed rgba(91, 123, 156, 0.6); z-index: 0;
+}
+.timeline-item {
+    counter-increment: agenda-step;
+    position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 22px 10px 16px; margin-top: 16px;
+    background: #FFFDF5; border: 2px dashed rgba(44, 53, 57, 0.3); border-radius: 12px;
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.07);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.timeline-item:nth-child(1) { transform: rotate(-2deg); }
+.timeline-item:nth-child(2) { transform: rotate(1.5deg); }
+.timeline-item:nth-child(3) { transform: rotate(-1.5deg); }
+.timeline-item:hover {
+    transform: scale(1.05) rotate(0deg) !important; box-shadow: 4px 6px 0 rgba(0, 0, 0, 0.12); z-index: 5;
+}
+.timeline-dot {
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    width: 32px; height: 32px; border-radius: 50%; background: var(--royal-blue);
+    border: 3px solid #FFFDF5; box-shadow: 0 0 0 2px var(--royal-blue), 2px 2px 0 rgba(0,0,0,0.15);
+    display: flex; align-items: center; justify-content: center; z-index: 2;
+}
+.timeline-dot::before {
+    content: counter(agenda-step);
+    font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 0.95rem; color: var(--white);
+}
+.timeline-time {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 1.1rem;
+    color: var(--royal-blue); white-space: nowrap;
+}
+.timeline-label {
+    font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.25rem; color: var(--charcoal-black);
+    margin-top: 6px; line-height: 1.3; max-width: 150px;
+}
+
+.peek-sticker {
+    position: absolute; top: -12px; left: 20px; background: var(--charcoal-black); color: var(--white); padding: 4px 12px; font-size: 0.85rem; font-weight: 900; border-radius: 4px; border: 2px solid var(--charcoal-black); font-family: 'Space Grotesk', sans-serif;
+    z-index: 150;
+}
+.peek-sticker.peek-2 { transform: rotate(-3deg); }
+.peek-sticker.peek-3 { left: auto; right: 20px; transform: rotate(3deg); }
+
+/* RSVP FORM */
+.rsvp-title h3 { font-size: 2.8rem; color: var(--charcoal-black); text-shadow: none; font-family: 'Patrick Hand', 'Caveat', cursive !important; }
+
+.street-form { display: flex; gap: 15px; width: 100%; align-items: stretch; margin-top: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.flex-1 { flex: 0.6; } .flex-2 { flex: 1.5; } .flex-3 { flex: 2; } .btn-group { flex: 1.2; flex-shrink: 0; }
+.hidden-label { opacity: 0; pointer-events: none; user-select: none; }
+.bento-card h3, .bento-card small, .rsvp-title p, .form-group label {
+    font-family: 'Patrick Hand', 'Caveat', cursive !important; font-size: 1.3rem; letter-spacing: 0;
+}
+
+/* FIX LỖI SCROLLBAR, ĐỘ RỘNG 100% VÀ HIỆU ỨNG TEXTAREA */
+.street-form input, .street-form textarea { 
+    width: 100%; 
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.4); 
+    border: none; 
+    border-bottom: 2px solid var(--royal-blue); 
+    border-radius: 6px 6px 0 0; 
+    padding: 12px 10px; 
+    font-family: 'Patrick Hand', 'Caveat', cursive !important; 
+    font-size: 1.5rem; color: var(--charcoal-black);
+    transition: all 0.3s ease; 
+    position: relative; 
+    z-index: 100 !important; 
+}
+.street-form input { height: 48px; }
+.street-form textarea { 
+    min-height: 48px; 
+    height: 48px; 
+    overflow-y: hidden; 
+    resize: none; 
+    white-space: pre-wrap;
+    word-break: break-all; 
+    overflow-wrap: break-word; 
+}
+.street-form input:hover, .street-form textarea:hover { background: rgba(91, 123, 156, 0.08); }
+.street-form input:focus, .street-form textarea:focus { outline: none; background: rgba(255, 255, 255, 0.8); border-bottom: 2px solid var(--charcoal-black); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+.submit-btn { 
+    background: var(--royal-blue); color: var(--white); border: var(--border-thick); padding: 0 10px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; box-shadow: 4px 4px 0 var(--charcoal-black); height: 48px; width: 100%; font-weight: 900; transition: all 0.25s ease; margin-top: auto; white-space: nowrap; font-family: 'Space Grotesk', sans-serif;
+}
+.submit-btn:hover { background: #FDFBF7; color: var(--charcoal-black); transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--charcoal-black); }
+.submit-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--charcoal-black); background: var(--royal-blue); color: var(--white); }
+
+/* FOOTER & MODALS */
+.street-footer {
+    width: 100%; background-color: #FDFBF7; background-image: radial-gradient(rgba(91, 123, 156, 0.15) 1px, transparent 1px);
+    background-size: 20px 20px; color: var(--charcoal-black); padding: 50px 20px 30px 20px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 80px; position: relative; border: none; border-bottom: 3px dashed rgba(44, 53, 57, 0.2); 
+    clip-path: polygon(0% 12px, 2% 2px, 5% 9px, 8% 1px, 12% 10px, 15% 3px, 18% 8px, 22% 2px, 25% 11px, 29% 4px, 32% 9px, 36% 1px, 40% 10px, 44% 3px, 48% 8px, 52% 2px, 55% 11px, 59% 4px, 63% 9px, 67% 1px, 71% 10px, 75% 3px, 78% 8px, 82% 2px, 85% 11px, 89% 4px, 93% 9px, 97% 1px, 100% 12px, 100% 100%, 0% 100%);
+    box-shadow: 0px -4px 15px rgba(0, 0, 0, 0.03);
+}
+.street-footer::before {
+    content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%) rotate(-1.5deg);
+    width: 140px; height: 28px; background-color: rgba(165, 192, 214, 0.7); 
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
+    background-size: 15px 15px; border-left: 2px dashed rgba(255, 255, 255, 0.5); border-right: 2px dashed rgba(255, 255, 255, 0.5); box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.05); z-index: 5;
+}
+.street-footer p { font-family: 'Patrick Hand', 'Caveat', cursive !important; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px; color: var(--charcoal-black); margin: 0; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8); }
+.street-footer span { font-family: 'Caveat', cursive !important; font-size: 1.6rem; color: var(--royal-blue); transform: rotate(-1deg); display: inline-block; transition: transform 0.3s ease, color 0.3s ease; cursor: pointer; }
+.street-footer span:hover { color: #C97B84; transform: scale(1.1) rotate(2deg); }
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 53, 57, 0.8); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+.modal-content { background: #FFFDF5; border: var(--border-thick); box-shadow: 12px 12px 0 var(--royal-blue); padding: 40px; max-width: 450px; width: 90%; text-align: center; border-radius: 16px; transform: scale(0.8); transition: transform 0.3s ease; }
+.modal-overlay.active .modal-content { transform: scale(1); }
+.close-modal-btn { background: var(--royal-blue); color: var(--white); border: var(--border-thick); padding: 10px 20px; border-radius: 8px; font-weight: 900; cursor: pointer; margin-top: 20px; }
+
+/* ==========================================================================
+   9. RESPONSIVE DESIGN (MOBILE) - FIX LỖI ĐÈ CHỮ VÀ TỌA ĐỘ
+   ========================================================================== */
+@media (max-width: 900px) {
+    .scrapbook-hero { padding: 80px 10px 60px 10px; }
+    .balloon-name-img { width: 230px; }
+    .ransom-letter { width: 28px; height: 38px; line-height: 34px; font-size: 1.4rem; }
+
+    /* 🚀 Thu nhỏ thời gian và kéo 2 bé ốp sát vào 2 bên */
+    .event-time { 
+        font-size: 3.2rem !important; /* Bóp nhỏ số 9:30 lại cho thanh lịch */
+        margin: 15px 0 !important; 
+    }
+    .details-decor-left { width: 75px; top: 25px; left: -30px; }
+    .details-decor-right { width: 80px; top: 30px; right: -35px; }
+    /* Hiển thị sticker */
+    .hero-decor, .bento-decor { display: block !important; opacity: 0.85; }
+    
+    /* Ẩn bớt web sticker rườm rà, còn chữ ký thì thu nhỏ lại để hiện trên mobile */
+    .person-web-right { display: none !important; }
+    .signature-right { width: 60px; height: 37px; top: 52px; left: 225px; bottom: auto; right: auto; }
+
+    /* Sao góc trên + trái tim cạnh ảnh chính - thu nhỏ và kéo vào để không bị cắt mất bởi overflow:hidden */
+    .name-stars-left { width: 18px; top: 55px; left: -22px; right: auto; z-index: 5; --tilt: -28deg; }
+    .invite-effect { width: 60px; top: -25px; left: -30px; --tilt: -130deg; }
+    .person-heart-left { width: 38px; top: 61%; left: auto; right: -18px; }
+
+    /* Góc trên cùng (Thu nhỏ trái châu xíu để chừa đất cho chữ) */
+    .disco-left { width: 130px; top: -100px; left: -50px; }
+    .flowers-right { width: 100px; top: -5px; right: -20px; --tilt: 0deg; transform: rotate(0deg) !important; }
+    .disco-right-bottom { width: 65px; top: 1%; right: -10px; } 
+
+    /* 3 bé scatter - thu nhỏ thêm và né vùng decor đông đúc phía trên */
+    .sc-new-1 { width: 50px; top: 28%; left: 1.5%; }
+    .sc-new-2 { width: 58px; bottom: 12%; left: 2%; }
+    .sc-new-3 { width: 50px; top: 20%; right: 1%; }
+
+    /* Đưa dòng chữ lọt thỏm vào giữa 2 icon trên Điện thoại */
+    .handwritten-invite { 
+        margin-top: -70px !important; 
+        max-width: 175px !important; 
+        font-size: 0.76rem !important; 
+        line-height: 2.1rem !important; 
+        padding: 0;
+    }
+
+    /* Kéo chữ BAO ANH sát lên trên thư tay */
+    .balloon-name-container { 
+        margin-top: -5px !important; 
+        margin-bottom: 10px !important; 
+    }
+
+    /* Vệ tinh ảnh main */
+    .main-person { max-width: 190px !important; margin-bottom: 20px; }
+    .person-stars-left { width: 24px; top: auto; bottom: -2%; left: auto; right: -14px; --tilt: -10deg; }
+    
+    /* Chỉnh bong bóng NICE xích xuống xíu để không đè mặt bé áo hồng */
+    .main-person-container .nice-bubble-css { right: -10px; top: 60px; }
+
+    /* Thu nhỏ và kéo 3 ảnh vệ tinh lọt vào trong màn hình */
+    .main-float-1 { width: 75px; top: -15px; left: -35px; }
+    .main-float-2 { width: 110px; top: -10px; right: -20px; --tilt: 10deg; } /* To hơn 1 chút cho dễ thấy */
+    .main-float-3 { width: 70px; bottom: 0px; left: -5px; }
+
+    /* Kéo dấu ! xuống thấp hơn để không bị card Countdown phía trên đè lên 1 góc */
+    .exclamation-sticker { top: -14px; left: 15px; }
+    .countdown-rocket { width: 42px; top: -14px; right: -8px; }
+    .rsvp-cat { width: 48px; bottom: -12px; left: -10px; }
+
+    /* Quanh Ransom Note */
+    .note-cat-left { width: 50px; bottom: -10px; left: -10px; }
+    .note-bow-right { width: 40px; top: 23px; right: -15px; } 
+    
+    /* Quanh Details (To hơn, 1 trên 1 dưới, tránh né chữ) */
+    .details-monkey-left { width: 80px; top: -10px; left: -78px; --tilt: -14deg; } 
+    .details-dog-right { width: 100px; bottom: -30px; right: -100px; top: auto; --tilt: 5deg; } 
+    .details-text-right { width: 58px; top: 2px; right: -38px; }
+    .agenda-pin { width: 25px; top: -10px; left: 0px; }
+
+    /* Đẩy chữ "by Banh Đòn" xuống giữa tí */
+    .event-credit { margin-top: 10px; text-align: center; }
+
+    /* Timeline dọc trên mobile */
+    .box-agenda { padding: 25px 20px 30px 20px; }
+    .agenda-title { font-size: 1.4rem; }
+    .timeline { flex-direction: column; align-items: stretch; gap: 18px; padding: 0; margin-top: 30px; max-width: none; }
+    .timeline::before { top: 8px; bottom: 8px; left: 16px; right: auto; width: 0; height: auto; border-top: none; border-left: 3px dashed rgba(91, 123, 156, 0.6); }
+    .timeline-item { flex-direction: row; align-items: center; text-align: left; justify-content: flex-start; padding: 14px 16px 14px 30px; margin-top: 0; gap: 14px; transform: none !important; }
+    .timeline-dot { top: 50%; left: -16px; transform: translateY(-50%); margin-bottom: 0; flex-shrink: 0; }
+    .timeline-time { min-width: 92px; }
+    .timeline-label { max-width: none; margin-top: 0; }
+
+    /* 💡 KÍCH THƯỚC VÀ TỌA ĐỘ 3 ẢNH BENTO BOX TRÊN ĐIỆN THOẠI */
+    
+    /* Xóa lỗi -550px, đưa bé bay về lại góc phải trên cùng của hộp Countdown */
+    .bento-p1 { width: 90px; top: -55px; right: -25px; left: auto !important; bottom: auto !important; }
+    
+    /* Bé đứng Call Me */
+    .bento-p2 { width: 150px; bottom: 15px; right: -15px; left: auto !important; top: auto !important; } 
+
+    /* Căn giữa 2 số điện thoại ngay dưới chữ CALL ME */
+    .contact-box { display: flex !important; flex-direction: column !important; align-items: center !important; width: 100% !important; }
+    .phone-wrapper { display: flex !important; width: 100% !important; justify-content: center !important; margin-left: auto !important; margin-right: auto !important; }
+    .dog-icon, .monkey-icon { margin-left: -20px; }
+    
+    /* Ép bé ngồi sang góc bên Phải, bỏ giới hạn chiều cao để không bị cắt xén */
+    .bento-p3 { width: 110px; top: -45px; right: 0px; left: auto !important; bottom: auto !important; max-height: none !important; }
+    
+    /* Grid bento box dọc */
+    .bento-grid { grid-template-columns: 1fr; }
+    .box-countdown, .box-contact, .box-agenda, .box-rsvp { grid-column: 1 / -1; }
+    
+    .street-form { flex-direction: column; align-items: stretch; }
+    .form-group { width: 100%; }
+    .bento-card { padding: 25px 15px; }
+
+    /* Footer Mobile */
+    .street-footer { margin-top: 50px; padding: 45px 15px 25px 15px; }
+    .street-footer p { font-size: 1.2rem; }
+    .street-footer span { font-size: 1.4rem; }
+    .street-footer::before { width: 110px; height: 24px; }
+}

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bao Anh - Graduation Ceremony 2026</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Special+Elite&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">  
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="street-grid-bg"></div>
+
+    <div class="bg-parallax-wrapper">
+        <div class="watermark parallax-layer" data-speed="0.3">2026</div>
+    </div>
+
+    <!-- Main Scrapbook Page Container -->
+    <main class="container">
+        
+        <section class="scrapbook-hero">
+            
+            <!-- 3 bé từng bị trôi ra ngoài lề, giờ tản đều bên trong khung -->
+            <img src="pic/main8.png" alt="" class="scatter-item sc-new-1" aria-hidden="true">
+            <img src="pic/main9.png" alt="" class="scatter-item sc-new-2" aria-hidden="true">
+            <img src="pic/main10.png" alt="" class="scatter-item sc-new-3" aria-hidden="true">
+            
+            <img src="pic/stickers/disco.png" alt="Disco Ball" class="hero-decor disco-left">
+            <img src="pic/stickers/text3.png" alt="Good things take time" class="hero-decor flowers-right">
+            <img src="pic/stickers/disco.png" alt="Disco Ball 2" class="hero-decor disco-right-bottom">
+
+            <div class="handwritten-invite">
+                I have graduated! It would mean so much to have you there to celebrate with me!
+            </div>
+
+            <!-- Tên & Chữ ký -->
+            <div class="balloon-name-container">
+                <img src="pic/stickers/denim-09.png" alt="Stars" class="hero-decor name-stars-left">
+                <img src="pic/effect.png" alt="Effect" class="hero-decor invite-effect">
+                <img src="name.png" alt="Bao Anh" class="balloon-name-img">
+                <div class="hero-decor signature-right" aria-label="Signature"></div>
+            </div>
+
+            <!-- Ảnh Main & Vệ Tinh -->
+            <div class="main-person-container">
+                <!-- Các sticker nhỏ cũ -->
+                <img src="pic/stickers/denim-10.png" alt="Heart" class="hero-decor person-heart-left">
+                <img src="pic/stickers/denim-09.png" alt="Stars 2" class="hero-decor person-stars-left">
+                <img src="pic/stickers/denim-12.png" alt="Web" class="hero-decor person-web-right">
+                
+                <!-- 🚀 3 ẢNH MỚI BAY QUANH ẢNH MAIN -->
+                <img src="pic/main13.png" alt="Bao Anh Float 1" class="hero-decor main-float-1">
+                <img src="pic/main14.png" alt="Bao Anh Float 2" class="hero-decor main-float-2">
+                <img src="pic/main7.png" alt="Bao Anh Float 3" class="hero-decor main-float-3">
+                <!-- Ảnh Main Trung Tâm -->
+                <img src="pic/main.png" alt="Main Bao Anh" class="main-person">
+            </div>
+
+            <!-- Ransom Note -->
+            <div class="ransom-note-container">
+                <div class="ransom-word">
+                    <span class="ransom-letter font-serif bg-dark">G</span>
+                    <span class="ransom-letter font-sans bg-light">r</span>
+                    <span class="ransom-letter font-mono bg-dark">a</span>
+                    <span class="ransom-letter font-serif bg-light">d</span>
+                    <span class="ransom-letter font-sans bg-dark">u</span>
+                    <span class="ransom-letter font-mono bg-light">a</span>
+                    <span class="ransom-letter font-serif bg-dark">t</span>
+                    <span class="ransom-letter font-sans bg-light">i</span>
+                    <span class="ransom-letter font-mono bg-dark">o</span>
+                    <span class="ransom-letter font-serif bg-light">n</span>
+                </div>
+                <div class="ransom-word">
+                    <span class="ransom-letter font-mono bg-dark">C</span>
+                    <span class="ransom-letter font-serif bg-light">e</span>
+                    <span class="ransom-letter font-sans bg-dark">r</span>
+                    <span class="ransom-letter font-mono bg-light">e</span>
+                    <span class="ransom-letter font-serif bg-dark">m</span>
+                    <span class="ransom-letter font-sans bg-light">o</span>
+                    <span class="ransom-letter font-mono bg-dark">n</span>
+                    <span class="ransom-letter font-serif bg-light">y</span>
+                </div>
+                <img src="pic/stickers/cat.png" alt="Cat" class="hero-decor note-cat-left">
+                <img src="pic/stickers/denim-04.png" alt="Bow" class="hero-decor note-bow-right">
+            </div>
+
+            <!-- Event Details -->
+            <div class="event-details-card">
+                <!-- 🚀 Điều động 2 bé từ ngoài vào lấp chỗ trống -->
+                <img src="pic/main11.png" alt="Bé đội nón ngoài hành tinh" class="hero-decor details-monkey-left">
+                <img src="pic/stickers/text2.png" alt="Everything will be OK" class="hero-decor details-text-right">
+                
+                <div class="event-date">6.8.2026</div>
+                <div class="event-time">11:00</div>
+                <div class="event-location">Hội trường A, SGU</div>
+                <div class="event-invite">invite <u>Các bạns</u></div>
+                <div class="event-credit">by Banh Đòn</div>
+                
+                <img src="pic/main12.png" alt="Bé ngồi ké ngựa" class="hero-decor details-dog-right">
+            </div>
+        </section>
+
+        <!-- ==========================================
+             BENTO GRID SECTION
+             ========================================== -->
+        <div class="bento-grid">
+            
+            <!-- Box 2: Countdown Timer -->
+            <article class="bento-card box-countdown">
+                <!-- Ảnh số 2 (Bé bay) -->
+                <img src="pic/main4.webp" alt="Bao Anh 4" class="bento-person bento-p1">
+                
+                <img src="pic/stickers/denim-08.png" alt="Button Sticker" class="bento-decor button-sticker">
+                <img src="pic/stickers/rocket.png" alt="Rocket" class="bento-decor countdown-rocket">
+                <span class="peek-sticker peek-2 bubble-font">COUNTDOWN</span>
+                <div class="timer">
+                    <div class="time-col"><span id="days" class="bubble-font">00</span><small>DAYS</small></div>
+                    <div class="colon">:</div>
+                    <div class="time-col"><span id="hours" class="bubble-font">00</span><small>HOURS</small></div>
+                    <div class="colon">:</div>
+                    <div class="time-col"><span id="mins" class="bubble-font">00</span><small>MINS</small></div>
+                </div>
+            </article>
+
+            <!-- Box 3: Contact Info -->
+            <article class="bento-card box-contact">
+                <!-- Ảnh số 3 (Bé đứng) -->
+                <img src="pic/main3.webp" alt="Bao Anh 3" class="bento-person bento-p2">
+                
+                <img src="pic/stickers/denim-01.png" alt="Exclamation" class="bento-decor exclamation-sticker">
+                <small>CALL ME</small>
+                
+                <!-- Khu vực SĐT đã được kẹp thêm 2 bé sticker -->
+                <div class="contact-box">
+                    <div class="phone-wrapper">
+                        <img src="pic/stickers/dog.png" alt="Chó" class="phone-icon dog-icon">
+                        <a href="tel:0868481076" class="phone-link bubble-font">0868 481 076</a>
+                    </div>
+                    <div class="phone-wrapper">
+                        <img src="pic/stickers/monkey.png" alt="Khỉ" class="phone-icon monkey-icon">
+                        <a href="tel:0346262088" class="phone-link bubble-font">034 626 2088</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Box 4: Agenda Timeline -->
+            <article class="bento-card box-agenda"> 
+                <img src="pic/stickers/denim-02.png" alt="Pin" class="bento-decor agenda-pin">
+                <span class="peek-sticker peek-3 bubble-font">TIMELINE</span>
+                <div class="agenda-head">
+                    <small>Cùng đi qua 1 ngày nhé</small>
+                </div>
+                <ul class="timeline">
+                    <li class="timeline-item">
+                        <span class="timeline-dot" aria-hidden="true"></span>
+                        <span class="timeline-time">8:30 – 9:30</span>
+                        <span class="timeline-label"> Đón tiếp gia đình</span>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-dot" aria-hidden="true"></span>
+                        <span class="timeline-time">9:30 – 11:00</span>
+                        <span class="timeline-label">Lễ tốt nghiệp diễn ra</span>
+                    </li>
+                    <li class="timeline-item">
+                        <span class="timeline-dot" aria-hidden="true"></span>
+                        <span class="timeline-time">11:00 – 12:00</span>
+                        <span class="timeline-label">Đón tiếp bạn bè 🎉</span>
+                    </li>
+                </ul>
+            </article>
+
+            <!-- Box 5: RSVP Form -->
+            <article class="bento-card box-rsvp">
+                <!-- 🚀 BÉ NGỒI ĐƯỢC CHỐT NHÀ Ở RSVP RỒI NHÉ -->
+                <img src="pic/main2.webp" alt="Bao Anh 2" class="bento-person bento-p3">
+
+                <img src="pic/stickers/denim-03.png" alt="Star Sticker" class="bento-decor star-sticker">
+                <img src="pic/stickers/denim-11.png" alt="Flower Disc Sticker" class="bento-decor notepad-sticker">
+                <img src="pic/stickers/silly-cat.png" alt="Cat thumbs up" class="bento-decor rsvp-cat">
+
+                <div class="rsvp-title">
+                    <h3 class="bubble-font">RSVP</h3>
+                    <p>XÁC NHẬN THAM GIA</p>
+                </div>
+                
+                <form id="rsvpForm" class="street-form">
+                    <div class="form-group flex-1">
+                        <label for="guestCount">SL GUEST</label>
+                        <input type="number" id="guestCount" min="1" value="1" required>
+                    </div>
+                    <div class="form-group flex-2">
+                        <label for="guestName">YOUR NAME</label>
+                        <input type="text" id="guestName" placeholder="Who r u?" required>
+                    </div>
+                    <div class="form-group flex-3">
+                        <label for="guestMsg">MESSAGE</label>
+                        <textarea id="guestMsg" placeholder="Do u've somethin' 2 say?"></textarea>
+                    </div>
+                    <div class="form-group btn-group">
+                        <label class="hidden-label">SUBMIT</label>
+                        <button type="submit" class="submit-btn bubble-font">See u soon!</button>
+                    </div>
+                </form>
+            </article>
+        </div>
+    </main>
+
+    <!-- Success Modal Pop-up -->
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="bubble-font">SUCCESS!</h3>
+            <p>Đã nhận được thông tin xác nhận của bạn. Hẹn gặp nhé!</p>
+            <button class="close-modal-btn" onclick="closeModal('success-modal')">ĐÓNG</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="street-footer">
+        <p>BAO ANH GRADUATION CEREMONY © 2026</p>
+        <span>MADE WITH ⚡ BY HOMIES</span>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
