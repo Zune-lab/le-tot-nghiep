@@ -238,6 +238,7 @@ body::before {
 .event-time { font-size: 4rem; font-weight: 900; color: var(--royal-blue); line-height: 1; margin: 10px 0; }
 .event-location { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; }
 .event-invite { font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 2rem; margin-top: 15px; }
+.event-credit { margin-top: 50px; font-size: 0.85rem; font-style: italic; color: rgba(44, 53, 57, 0.55); }
 
 /* ==========================================================================
    BENTO GRID VÀ CÁC THẺ MỤC LỤC 
@@ -331,7 +332,7 @@ body::before {
     counter-reset: agenda-step;
 }
 .timeline::before {
-    content: ''; position: absolute; top: 0; left: 7%; right: 7%; height: 0;
+    content: ''; position: absolute; top: 16px; left: 7%; right: 7%; height: 0;
     border-top: 3px dashed rgba(91, 123, 156, 0.6); z-index: 0;
 }
 .timeline-item {
@@ -429,14 +430,20 @@ body::before {
     box-shadow: 0px -4px 15px rgba(0, 0, 0, 0.03);
 }
 .street-footer::before {
-    content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%) rotate(-1.5deg);
-    width: 140px; height: 28px; background-color: rgba(165, 192, 214, 0.7); 
+    content: ''; position: absolute; bottom: -12px; left: 12%; transform: rotate(4deg);
+    width: 100px; height: 24px; background-color: rgba(165, 192, 214, 0.7);
     background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
-    background-size: 15px 15px; border-left: 2px dashed rgba(255, 255, 255, 0.5); border-right: 2px dashed rgba(255, 255, 255, 0.5); box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.05); z-index: 5;
+    background-size: 15px 15px; border-left: 2px dashed rgba(255, 255, 255, 0.5); border-right: 2px dashed rgba(255, 255, 255, 0.5); box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.08); z-index: 1;
 }
 .street-footer p { font-family: 'Patrick Hand', 'Caveat', cursive !important; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px; color: var(--charcoal-black); margin: 0; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8); }
-.street-footer span { font-family: 'Caveat', cursive !important; font-size: 1.6rem; color: var(--royal-blue); transform: rotate(-1deg); display: inline-block; transition: transform 0.3s ease, color 0.3s ease; cursor: pointer; }
-.street-footer span:hover { color: #C97B84; transform: scale(1.1) rotate(2deg); }
+
+.footer-divider { width: 60px; height: 2px; margin: 10px 0 6px 0; background: repeating-linear-gradient(90deg, var(--royal-blue) 0 6px, transparent 6px 11px); opacity: 0.55; }
+
+.footer-credit { font-family: 'Space Grotesk', sans-serif !important; font-size: 1rem; color: rgba(44, 53, 57, 0.65); display: inline-flex; align-items: center; gap: 4px; }
+.footer-credit b { font-family: 'Patrick Hand', cursive !important; font-size: 1.6rem; font-weight: 700; color: var(--royal-blue); transform: rotate(-1.5deg); display: inline-block; transition: transform 0.3s ease, color 0.3s ease; cursor: pointer; }
+.footer-credit b:hover { color: #C97B84; transform: scale(1.1) rotate(2deg); }
+.footer-heart { display: inline-block; animation: heartbeat 1.6s ease-in-out infinite; }
+@keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 53, 57, 0.8); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -526,13 +533,13 @@ body::before {
     .agenda-pin { width: 25px; top: -10px; left: 0px; }
 
     /* Đẩy chữ "by Banh Đòn" xuống giữa tí */
-    .event-credit { margin-top: 10px; text-align: center; }
+    .event-credit { margin-top: 25px; text-align: center; }
 
     /* Timeline dọc trên mobile */
     .box-agenda { padding: 25px 20px 30px 20px; }
     .agenda-title { font-size: 1.4rem; }
     .timeline { flex-direction: column; align-items: stretch; gap: 18px; padding: 0; margin-top: 30px; max-width: none; }
-    .timeline::before { top: 8px; bottom: 8px; left: 16px; right: auto; width: 0; height: auto; border-top: none; border-left: 3px dashed rgba(91, 123, 156, 0.6); }
+    .timeline::before { top: 8px; bottom: 8px; left: 0; right: auto; width: 0; height: auto; border-top: none; border-left: 3px dashed rgba(91, 123, 156, 0.6); }
     .timeline-item { flex-direction: row; align-items: center; text-align: left; justify-content: flex-start; padding: 14px 16px 14px 30px; margin-top: 0; gap: 14px; transform: none !important; }
     .timeline-dot { top: 50%; left: -16px; transform: translateY(-50%); margin-bottom: 0; flex-shrink: 0; }
     .timeline-time { min-width: 92px; }
@@ -564,7 +571,7 @@ body::before {
 
     /* Footer Mobile */
     .street-footer { margin-top: 50px; padding: 45px 15px 25px 15px; }
+    .street-footer::before { width: 80px; height: 20px; }
     .street-footer p { font-size: 1.2rem; }
     .street-footer span { font-size: 1.4rem; }
-    .street-footer::before { width: 110px; height: 24px; }
 }
