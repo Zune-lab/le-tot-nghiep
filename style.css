@@ -16,6 +16,15 @@
     --hot-pink: #C97B84;
     --neon-green: #7FA98B;
     --alert-red: #C1666B;
+
+    /* 🌈 7 sắc cầu vồng - dùng chung cho ransom note, RSVP, countdown, timeline... */
+    --rainbow-1: #E63946; /* đỏ */
+    --rainbow-2: #F4A261; /* cam */
+    --rainbow-3: #E9C46A; /* vàng */
+    --rainbow-4: #2A9D8F; /* xanh lá */
+    --rainbow-5: #457B9D; /* xanh dương */
+    --rainbow-6: #6A4C93; /* chàm */
+    --rainbow-7: #B565A7; /* tím */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -61,7 +70,7 @@ body::before {
     white-space: nowrap; user-select: none;
 }
 
-.container { max-width: 1000px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; flex: 1 0 auto; width: 100%; }
 
 .scrapbook-hero {
     position: relative; background-color: #FDFBF7;
@@ -233,6 +242,28 @@ body::before {
 .ransom-letter:nth-child(odd) { transform: rotate(-4deg) translateY(-2px); }
 .ransom-letter:nth-child(even) { transform: rotate(3deg) translateY(2px); }
 
+/* 🌈 Class dùng chung để tô màu cầu vồng cho từng ký tự (RSVP, ngày giờ...) */
+.rc1 { color: var(--rainbow-1) !important; }
+.rc2 { color: var(--rainbow-2) !important; }
+.rc3 { color: var(--rainbow-3) !important; }
+.rc4 { color: var(--rainbow-4) !important; }
+.rc5 { color: var(--rainbow-5) !important; }
+.rc6 { color: var(--rainbow-6) !important; }
+.rc7 { color: var(--rainbow-7) !important; }
+.rc-dot { color: inherit; opacity: 0.55; }
+
+.rsvp-title h3 span { display: inline-block; transition: transform 0.2s ease; }
+.rsvp-title h3 span:hover { transform: scale(1.2) rotate(-6deg); }
+
+/* 🌈 mỗi chữ 1 màu cầu vồng, đè lên bg-dark/bg-light */
+.ransom-word .ransom-letter:nth-child(7n+1) { background-color: var(--rainbow-1) !important; color: #fff !important; }
+.ransom-word .ransom-letter:nth-child(7n+2) { background-color: var(--rainbow-2) !important; color: #2C3539 !important; }
+.ransom-word .ransom-letter:nth-child(7n+3) { background-color: var(--rainbow-3) !important; color: #2C3539 !important; }
+.ransom-word .ransom-letter:nth-child(7n+4) { background-color: var(--rainbow-4) !important; color: #fff !important; }
+.ransom-word .ransom-letter:nth-child(7n+5) { background-color: var(--rainbow-5) !important; color: #fff !important; }
+.ransom-word .ransom-letter:nth-child(7n+6) { background-color: var(--rainbow-6) !important; color: #fff !important; }
+.ransom-word .ransom-letter:nth-child(7n) { background-color: var(--rainbow-7) !important; color: #fff !important; }
+
 .event-details-card { position: relative; display: block; width: fit-content; margin: 15px auto 0 auto; font-family: 'Space Grotesk', sans-serif; z-index: 6; }
 .event-date { font-size: 1.8rem; font-weight: 900; letter-spacing: 1px; }
 .event-time { font-size: 4rem; font-weight: 900; color: var(--royal-blue); line-height: 1; margin: 10px 0; }
@@ -280,6 +311,15 @@ body::before {
 .time-col { display: flex; flex-direction: column; align-items: center; }
 .time-col span { font-size: 3.5rem; color: var(--white); line-height: 1; text-shadow: 3px 3px 0 var(--charcoal-black); font-family: 'Space Grotesk', sans-serif;}
 .time-col small { font-weight: 700; font-size: 0.75rem; margin-top: 5px; background: var(--white); padding: 2px 8px; border: 2px solid var(--charcoal-black); font-family: 'Space Grotesk', sans-serif; }
+
+/* 🌈 Mỗi ô đếm ngược 1 màu cầu vồng riêng, colon nổi bật hơn màu trắng cũ */
+#days { color: var(--rainbow-1) !important; }
+#hours { color: var(--rainbow-4) !important; }
+#mins { color: var(--rainbow-6) !important; }
+.colon { color: var(--rainbow-2); }
+.timer .time-col:nth-child(1) small { color: var(--rainbow-1); border-color: var(--rainbow-1); }
+.timer .time-col:nth-child(3) small { color: var(--rainbow-4); border-color: var(--rainbow-4); }
+.timer .time-col:nth-child(5) small { color: var(--rainbow-6); border-color: var(--rainbow-6); }
 
 .contact-box { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; margin: 10px auto 0 auto; width: fit-content; }
 .contact-box a { font-size: 1.4rem; }
@@ -359,6 +399,14 @@ body::before {
     content: counter(agenda-step);
     font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 0.95rem; color: var(--white);
 }
+
+/* 🌈 Mỗi mốc thời gian 1 màu cầu vồng riêng cho chấm tròn + giờ */
+.timeline-item:nth-child(1) .timeline-dot { background: var(--rainbow-1); box-shadow: 0 0 0 2px var(--rainbow-1), 2px 2px 0 rgba(0,0,0,0.15); }
+.timeline-item:nth-child(2) .timeline-dot { background: var(--rainbow-4); box-shadow: 0 0 0 2px var(--rainbow-4), 2px 2px 0 rgba(0,0,0,0.15); }
+.timeline-item:nth-child(3) .timeline-dot { background: var(--rainbow-6); box-shadow: 0 0 0 2px var(--rainbow-6), 2px 2px 0 rgba(0,0,0,0.15); }
+.timeline-item:nth-child(1) .timeline-time { color: var(--rainbow-1); }
+.timeline-item:nth-child(2) .timeline-time { color: var(--rainbow-4); }
+.timeline-item:nth-child(3) .timeline-time { color: var(--rainbow-6); }
 .timeline-time {
     font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 1.1rem;
     color: var(--royal-blue); white-space: nowrap;
@@ -380,8 +428,20 @@ body::before {
 
 .street-form { display: flex; gap: 15px; width: 100%; align-items: stretch; margin-top: 20px; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
+.msg-hint {
+    font-family: 'Patrick Hand', cursive; font-size: 0.8rem; font-style: italic;
+    line-height: 1.3; color: rgba(44, 53, 57, 0.5); order: 1;
+}
+.hint-spacer { visibility: hidden; }
+.form-group input, .form-group textarea { order: 2; }
 .flex-1 { flex: 0.6; } .flex-2 { flex: 1.5; } .flex-3 { flex: 2; } .btn-group { flex: 1.2; flex-shrink: 0; }
 .hidden-label { opacity: 0; pointer-events: none; user-select: none; }
+
+/* 🖥️ CHỈ TRÊN PC: gợi ý nằm ngay cạnh chữ MESSAGE trên cùng 1 hàng */
+@media (min-width: 901px) {
+    .msg-label-row { display: flex; align-items: baseline; gap: 10px; }
+    .msg-hint { margin: 0; white-space: nowrap; }
+}
 .bento-card h3, .bento-card small, .rsvp-title p, .form-group label {
     font-family: 'Patrick Hand', 'Caveat', cursive !important; font-size: 1.3rem; letter-spacing: 0;
 }
@@ -422,20 +482,23 @@ body::before {
 
 /* FOOTER & MODALS */
 .street-footer {
-    width: 100%; background-color: #FDFBF7; background-image: radial-gradient(rgba(91, 123, 156, 0.15) 1px, transparent 1px);
+    width: 100%; flex-shrink: 0; background-color: #FDFBF7; background-image: radial-gradient(rgba(91, 123, 156, 0.15) 1px, transparent 1px);
     background-size: 20px 20px; color: var(--charcoal-black); padding: 50px 20px 30px 20px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
     margin-top: 80px; position: relative; border: none; border-bottom: 3px dashed rgba(44, 53, 57, 0.2); 
     clip-path: polygon(0% 12px, 2% 2px, 5% 9px, 8% 1px, 12% 10px, 15% 3px, 18% 8px, 22% 2px, 25% 11px, 29% 4px, 32% 9px, 36% 1px, 40% 10px, 44% 3px, 48% 8px, 52% 2px, 55% 11px, 59% 4px, 63% 9px, 67% 1px, 71% 10px, 75% 3px, 78% 8px, 82% 2px, 85% 11px, 89% 4px, 93% 9px, 97% 1px, 100% 12px, 100% 100%, 0% 100%);
     box-shadow: 0px -4px 15px rgba(0, 0, 0, 0.03);
 }
-.street-footer::before {
-    content: ''; position: absolute; bottom: -12px; left: 12%; transform: rotate(4deg);
-    width: 100px; height: 24px; background-color: rgba(165, 192, 214, 0.7);
+.street-footer p {
+    position: relative; font-family: 'Patrick Hand', 'Caveat', cursive !important; font-size: 1.5rem; font-weight: 700;
+    letter-spacing: 0.5px; color: var(--charcoal-black); margin: 0; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
+}
+.street-footer p::before {
+    content: ''; position: absolute; top: -16px; left: -14px; transform: rotate(-6deg);
+    width: 70px; height: 20px; background-color: rgba(165, 192, 214, 0.7);
     background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
     background-size: 15px 15px; border-left: 2px dashed rgba(255, 255, 255, 0.5); border-right: 2px dashed rgba(255, 255, 255, 0.5); box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.08); z-index: 1;
 }
-.street-footer p { font-family: 'Patrick Hand', 'Caveat', cursive !important; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px; color: var(--charcoal-black); margin: 0; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8); }
 
 .footer-divider { width: 60px; height: 2px; margin: 10px 0 6px 0; background: repeating-linear-gradient(90deg, var(--royal-blue) 0 6px, transparent 6px 11px); opacity: 0.55; }
 
@@ -567,11 +630,15 @@ body::before {
     
     .street-form { flex-direction: column; align-items: stretch; }
     .form-group { width: 100%; }
+    .msg-label-row { display: contents; }
+    .msg-hint { order: 3; margin-top: 4px; }
+    .hint-spacer { display: none; }
+    .hidden-label { display: none; }
     .bento-card { padding: 25px 15px; }
 
     /* Footer Mobile */
     .street-footer { margin-top: 50px; padding: 45px 15px 25px 15px; }
-    .street-footer::before { width: 80px; height: 20px; }
+    .street-footer p::before { width: 55px; height: 16px; top: -13px; left: -8px; }
     .street-footer p { font-size: 1.2rem; }
     .street-footer span { font-size: 1.4rem; }
 }

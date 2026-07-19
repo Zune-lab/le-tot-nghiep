@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@400;600;700&family=Special+Elite&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">  
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=5">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -96,8 +96,8 @@
                 <img src="pic/main11.png" alt="Bé đội nón ngoài hành tinh" class="hero-decor details-monkey-left">
                 <img src="pic/stickers/text2.png" alt="Everything will be OK" class="hero-decor details-text-right">
                 
-                <div class="event-date">6.8.2026</div>
-                <div class="event-time">11:00</div>
+                <div class="event-date"><span class="rc1">6</span><span class="rc-dot">.</span><span class="rc2">8</span><span class="rc-dot">.</span><span class="rc3">2</span><span class="rc4">0</span><span class="rc5">2</span><span class="rc6">6</span></div>
+                <div class="event-time"><span class="rc1">1</span><span class="rc2">1</span><span class="rc-dot">:</span><span class="rc4">0</span><span class="rc5">0</span></div>
                 <div class="event-location">Hội trường A, SGU</div>
                 <div class="event-invite">invite <u>Các bạns</u></div>
                 <div class="event-credit">by Banh Đòn</div>
@@ -185,7 +185,7 @@
                 <img src="pic/stickers/silly-cat.png" alt="Cat thumbs up" class="bento-decor rsvp-cat">
 
                 <div class="rsvp-title">
-                    <h3 class="bubble-font">RSVP</h3>
+                    <h3 class="bubble-font"><span class="rc1">R</span><span class="rc2">S</span><span class="rc3">V</span><span class="rc4">P</span></h3>
                     <p>XÁC NHẬN THAM GIA</p>
                 </div>
                 
@@ -199,7 +199,10 @@
                         <input type="text" id="guestName" placeholder="Who r u?" required>
                     </div>
                     <div class="form-group flex-3">
-                        <label for="guestMsg">MESSAGE</label>
+                        <div class="msg-label-row">
+                            <label for="guestMsg">MESSAGE</label>
+                            <small class="msg-hint">Gợi ý: kỉ niệm, lời chúc, lời nhắn nhủ...</small>
+                        </div>
                         <textarea id="guestMsg" placeholder="Do u've somethin' 2 say?"></textarea>
                     </div>
                     <div class="form-group btn-group">
