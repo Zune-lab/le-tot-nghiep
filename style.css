@@ -104,11 +104,13 @@ body::before {
 
 /* Các sticker không phải người ở đầu trang: đứng yên, không animation/transform */
 .name-stars-left,
-.signature-right, .person-heart-left, .person-stars-left, .person-web-right,
+.person-heart-left, .person-stars-left, .person-web-right,
 .note-cat-left {
     animation: none !important;
     transform: none !important;
 }
+/* Chữ ký: không float lắc lư như sticker khác, nhưng VẪN cho phép chạy hiệu ứng riêng (tự ký) */
+.signature-right { transform: none !important; }
 
 /* Đứng yên nhưng vẫn giữ nghiêng tĩnh riêng cho từng sticker */
 .disco-left { animation: none !important; transform: rotate(-25deg) !important; }
@@ -168,6 +170,13 @@ body::before {
     
     /* 3. Bóng đổ nhẹ cho chữ ký nổi bật trên mặt giấy */
     filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.15));
+
+    /* 4. ✍️ Hiệu ứng "tự ký" 1 lần khi tải trang - mực hiện dần từ trái sang phải */
+    clip-path: inset(0 100% 0 0);
+    animation: signatureDraw 1.3s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
+}
+@keyframes signatureDraw {
+    to { clip-path: inset(0 0% 0 0); }
 }
 .person-heart-left { top: 40%; left: -60px; width: 55px; --tilt: -20deg; }
 .person-stars-left { top: auto; left: auto; right: -75px; bottom: 20%; width: 40px; --tilt: 15deg; }
@@ -175,7 +184,7 @@ body::before {
 .note-cat-left { bottom: -20px; left: -60px; width: 85px; --tilt: -12deg; z-index: 7; }
 /* 2 Bé lấp chỗ trống khu vực thời gian */
 .note-bow-right { bottom: 40px; right: -32px; width: 60px; --tilt: -35deg; z-index: 7; }
-.details-monkey-left { top: 63px; left: -165px; width: 130px; --tilt: -14deg; z-index: 7; }
+.details-toystory-left { top: 63px; left: -165px; width: 130px; --tilt: -14deg; z-index: 7; }
 .details-dog-right { bottom: -65px; right: -150px; width: 135px; --tilt: 6deg; z-index: 7; }
 .details-text-right { top: -5px; right: -115px; width: 95px; --tilt: 8deg; z-index: 8; }
 .agenda-pin { top: -20px; left: -20px; width: 40px; --tilt: -55deg; z-index: 10; }
@@ -207,6 +216,13 @@ body::before {
     font-size: 1.6rem; font-style: italic; color: var(--charcoal-black); 
     line-height: 2.5rem; margin: -50px auto 15px auto; max-width: 340px; transform: rotate(-1deg); 
     position: relative; z-index: 10; text-align: center;
+}
+.invite-accent {
+    position: relative; color: var(--charcoal-black); font-style: italic; white-space: nowrap;
+}
+.invite-accent::after {
+    content: ''; position: absolute; left: -3px; right: -3px; bottom: 1px; height: 38%;
+    background: var(--rainbow-3); opacity: 0.55; z-index: -1; transform: rotate(-1deg); border-radius: 2px;
 }
 
 .balloon-name-container { position: relative; display: block; width: fit-content; margin: 0 auto -5px auto; z-index: 4; }
@@ -250,7 +266,13 @@ body::before {
 .rc5 { color: var(--rainbow-5) !important; }
 .rc6 { color: var(--rainbow-6) !important; }
 .rc7 { color: var(--rainbow-7) !important; }
-.rc-dot { color: inherit; opacity: 0.55; }
+.rc-dot {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--rainbow-1), var(--rainbow-3), var(--rainbow-4), var(--rainbow-6));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
 
 .rsvp-title h3 span { display: inline-block; transition: transform 0.2s ease; }
 .rsvp-title h3 span:hover { transform: scale(1.2) rotate(-6deg); }
@@ -267,9 +289,20 @@ body::before {
 .event-details-card { position: relative; display: block; width: fit-content; margin: 15px auto 0 auto; font-family: 'Space Grotesk', sans-serif; z-index: 6; }
 .event-date { font-size: 1.8rem; font-weight: 900; letter-spacing: 1px; }
 .event-time { font-size: 4rem; font-weight: 900; color: var(--royal-blue); line-height: 1; margin: 10px 0; }
-.event-location { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; }
+.event-location {
+    font-size: 1.2rem; font-weight: 700; text-transform: uppercase;
+    position: relative; display: inline-block; z-index: 1;
+}
+.event-location::before {
+    content: ''; position: absolute; left: -6px; right: -6px; bottom: 3px; height: 42%;
+    background: var(--rainbow-3); opacity: 0.6; transform: rotate(-1.2deg); border-radius: 3px; z-index: -1;
+}
 .event-invite { font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 2rem; margin-top: 15px; }
-.event-credit { margin-top: 50px; font-size: 0.85rem; font-style: italic; color: rgba(44, 53, 57, 0.55); }
+.event-invite u { color: var(--rainbow-5); text-decoration-color: var(--rainbow-3); text-decoration-thickness: 3px; text-underline-offset: 3px; }
+.event-credit {
+    margin-top: 50px; font-size: 0.9rem; font-family: 'Patrick Hand', cursive; font-style: normal;
+    color: var(--rainbow-5); font-weight: 700; letter-spacing: 0.3px;
+}
 
 /* ==========================================================================
    BENTO GRID VÀ CÁC THẺ MỤC LỤC 
@@ -310,16 +343,16 @@ body::before {
 .colon { font-size: 2.5rem; font-weight: 900; margin-bottom: 20px; color: var(--white); font-family: 'Space Grotesk', sans-serif; }
 .time-col { display: flex; flex-direction: column; align-items: center; }
 .time-col span { font-size: 3.5rem; color: var(--white); line-height: 1; text-shadow: 3px 3px 0 var(--charcoal-black); font-family: 'Space Grotesk', sans-serif;}
-.time-col small { font-weight: 700; font-size: 0.75rem; margin-top: 5px; background: var(--white); padding: 2px 8px; border: 2px solid var(--charcoal-black); font-family: 'Space Grotesk', sans-serif; }
+.time-col small { font-weight: 700; font-size: 0.75rem; margin-top: 5px; background: var(--white); padding: 2px 8px; border: 2px solid var(--charcoal-black); font-family: 'Space Grotesk', sans-serif; display: inline-block; }
 
 /* 🌈 Mỗi ô đếm ngược 1 màu cầu vồng riêng, colon nổi bật hơn màu trắng cũ */
 #days { color: var(--rainbow-1) !important; }
 #hours { color: var(--rainbow-4) !important; }
 #mins { color: var(--rainbow-6) !important; }
 .colon { color: var(--rainbow-2); }
-.timer .time-col:nth-child(1) small { color: var(--rainbow-1); border-color: var(--rainbow-1); }
-.timer .time-col:nth-child(3) small { color: var(--rainbow-4); border-color: var(--rainbow-4); }
-.timer .time-col:nth-child(5) small { color: var(--rainbow-6); border-color: var(--rainbow-6); }
+.timer .time-col:nth-child(1) small { color: var(--rainbow-1); border-color: var(--rainbow-1); transform: rotate(-4deg); }
+.timer .time-col:nth-child(3) small { color: var(--rainbow-4); border-color: var(--rainbow-4); transform: rotate(3deg); }
+.timer .time-col:nth-child(5) small { color: var(--rainbow-6); border-color: var(--rainbow-6); transform: rotate(-2deg); }
 
 .contact-box { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; margin: 10px auto 0 auto; width: fit-content; }
 .contact-box a { font-size: 1.4rem; }
@@ -347,7 +380,7 @@ body::before {
 }
 
 .dog-icon { transform: rotate(-10deg); }
-.monkey-icon { transform: rotate(15deg); }
+.cat-icon { transform: rotate(6deg); }
 
 /* Hiệu ứng: Khi lướt chuột vào SĐT, 2 bé sẽ nhún nhảy */
 .phone-wrapper:hover .phone-icon { transform: scale(1.15) rotate(0deg); }
@@ -361,6 +394,7 @@ body::before {
 .box-agenda { padding: 30px 30px 85px 30px; }
 
 .agenda-head { margin-bottom: 6px; }
+.agenda-head small { font-weight: 700; }
 .agenda-title {
     font-size: 1.7rem; margin-top: 2px; color: var(--charcoal-black);
     transform: rotate(-1deg); display: inline-block;
@@ -422,6 +456,7 @@ body::before {
 }
 .peek-sticker.peek-2 { transform: rotate(-3deg); }
 .peek-sticker.peek-3 { left: auto; right: 20px; transform: rotate(3deg); }
+.peek-sticker.peek-1 { left: 50%; transform: translateX(-50%) rotate(-2deg); }
 
 /* RSVP FORM */
 .rsvp-title h3 { font-size: 2.8rem; color: var(--charcoal-black); text-shadow: none; font-family: 'Patrick Hand', 'Caveat', cursive !important; }
@@ -445,6 +480,7 @@ body::before {
 .bento-card h3, .bento-card small, .rsvp-title p, .form-group label {
     font-family: 'Patrick Hand', 'Caveat', cursive !important; font-size: 1.3rem; letter-spacing: 0;
 }
+.form-group label { white-space: nowrap; }
 
 /* FIX LỖI SCROLLBAR, ĐỘ RỘNG 100% VÀ HIỆU ỨNG TEXTAREA */
 .street-form input, .street-form textarea { 
@@ -479,6 +515,7 @@ body::before {
 }
 .submit-btn:hover { background: #FDFBF7; color: var(--charcoal-black); transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--charcoal-black); }
 .submit-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--charcoal-black); background: var(--royal-blue); color: var(--white); }
+.submit-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: 4px 4px 0 var(--charcoal-black); }
 
 /* FOOTER & MODALS */
 .street-footer {
@@ -512,9 +549,46 @@ body::before {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 53, 57, 0.8); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
-.modal-content { background: #FFFDF5; border: var(--border-thick); box-shadow: 12px 12px 0 var(--royal-blue); padding: 40px; max-width: 450px; width: 90%; text-align: center; border-radius: 16px; transform: scale(0.8); transition: transform 0.3s ease; }
-.modal-overlay.active .modal-content { transform: scale(1); }
-.close-modal-btn { background: var(--royal-blue); color: var(--white); border: var(--border-thick); padding: 10px 20px; border-radius: 8px; font-weight: 900; cursor: pointer; margin-top: 20px; }
+.modal-content {
+    background: #FFFDF5; border: var(--border-thick); padding: 40px; max-width: 450px; width: 90%; text-align: center;
+    border-radius: 20px; position: relative; overflow: hidden;
+    box-shadow: 0 0 0 4px var(--rainbow-1), 0 0 0 8px var(--rainbow-3), 0 0 0 12px var(--rainbow-4), 12px 12px 0 var(--royal-blue);
+    transform: scale(0.6) rotate(-4deg); transition: transform 0.1s;
+}
+.modal-overlay.active .modal-content { animation: modalPopIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+@keyframes modalPopIn {
+    0% { transform: scale(0.5) rotate(-6deg); }
+    60% { transform: scale(1.06) rotate(2deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+.modal-icon { font-size: 3.2rem; line-height: 1; margin-bottom: 6px; display: inline-block; animation: modalIconBounce 1.1s ease-in-out infinite; }
+@keyframes modalIconBounce { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-8px) rotate(6deg); } }
+.close-modal-btn {
+    background: var(--royal-blue); color: var(--white); border: 3px solid var(--charcoal-black); padding: 10px 26px; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 22px; box-shadow: 4px 4px 0 var(--charcoal-black); transition: all 0.2s ease; font-family: 'Space Grotesk', sans-serif;
+}
+.close-modal-btn:hover { background: #FDFBF7; color: var(--charcoal-black); transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--charcoal-black); }
+.close-modal-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--charcoal-black); background: var(--royal-blue); color: var(--white); }
+
+/* 🔔 TOAST NOTIFICATIONS (gửi ảnh thành công / thất bại...) */
+#toast-container {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 10000; display: flex; flex-direction: column; gap: 10px;
+    width: 90%; max-width: 380px; pointer-events: none;
+}
+.toast {
+    display: flex; align-items: center; gap: 10px; padding: 14px 18px;
+    border-radius: 14px; background: #FFFDF5; border: var(--border-thick);
+    box-shadow: 5px 5px 0 var(--charcoal-black); font-family: 'Patrick Hand', cursive;
+    font-size: 1.05rem; font-weight: 700; color: var(--charcoal-black);
+    animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    pointer-events: auto;
+}
+.toast.toast-out { animation: toastOut 0.35s ease forwards; }
+.toast .toast-icon { font-size: 1.4rem; flex-shrink: 0; }
+.toast-success { border-color: var(--rainbow-4); box-shadow: 5px 5px 0 var(--rainbow-4); }
+.toast-error { border-color: var(--rainbow-1); box-shadow: 5px 5px 0 var(--rainbow-1); }
+@keyframes toastIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
 
 /* ==========================================================================
    9. RESPONSIVE DESIGN (MOBILE) - FIX LỖI ĐÈ CHỮ VÀ TỌA ĐỘ
@@ -590,7 +664,7 @@ body::before {
     .note-bow-right { width: 40px; top: 30px; right: -15px; } 
     
     /* Quanh Details (To hơn, 1 trên 1 dưới, tránh né chữ) */
-    .details-monkey-left { width: 80px; top: 6px; left: -78px; --tilt: -14deg; } 
+    .details-toystory-left { width: 80px; top: 15px; left: -78px; --tilt: -14deg; } 
     .details-dog-right { width: 100px; bottom: -30px; right: -100px; top: auto; --tilt: 5deg; } 
     .details-text-right { width: 58px; top: 2px; right: -38px; }
     .agenda-pin { width: 25px; top: -10px; left: 0px; }
@@ -619,7 +693,7 @@ body::before {
     /* Căn giữa 2 số điện thoại ngay dưới chữ CALL ME */
     .contact-box { display: flex !important; flex-direction: column !important; align-items: center !important; width: 100% !important; }
     .phone-wrapper { display: flex !important; width: 100% !important; justify-content: center !important; margin-left: auto !important; margin-right: auto !important; }
-    .dog-icon, .monkey-icon { margin-left: -20px; }
+    .dog-icon, .cat-icon { margin-left: -20px; }
     
     /* Ép bé ngồi sang góc bên Phải, bỏ giới hạn chiều cao để không bị cắt xén */
     .bento-p3 { width: 110px; top: -45px; right: 0px; left: auto !important; bottom: auto !important; max-height: none !important; }

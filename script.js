@@ -46,6 +46,55 @@ document.addEventListener('DOMContentLoaded', () => {
     renderInviteName(getSavedGuestName());
     
     // =========================================================
+    // 0.6. TOAST NOTIFICATION (thông báo nhỏ góc trên, dùng cho gửi ảnh...)
+    // =========================================================
+    function showToast(message, type = 'success', duration = 3200) {
+        const container = document.getElementById('toast-container');
+        if (!container) { alert(message); return; }
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+
+        const icon = document.createElement('span');
+        icon.className = 'toast-icon';
+        icon.textContent = type === 'success' ? '✅' : '⚠️';
+
+        const text = document.createElement('span');
+        text.textContent = message;
+
+        toast.appendChild(icon);
+        toast.appendChild(text);
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('toast-out');
+            toast.addEventListener('animationend', () => toast.remove(), { once: true });
+        }, duration);
+    }
+    window.showToast = showToast;
+
+    // Bọc mỗi chữ trong 1 span màu cầu vồng (rc1..rc7), dùng cho tiêu đề modal
+    function rainbowize(text) {
+        const frag = document.createDocumentFragment();
+        let colorIdx = 0;
+        for (const ch of text) {
+            const span = document.createElement('span');
+            span.textContent = ch;
+            if (/\s/.test(ch)) {
+                // giữ nguyên khoảng trắng, không tính màu
+            } else if (!/[\p{L}\p{N}]/u.test(ch)) {
+                span.className = 'rc-dot';
+            } else {
+                colorIdx = (colorIdx % 7) + 1;
+                span.className = `rc${colorIdx}`;
+            }
+            frag.appendChild(span);
+        }
+        return frag;
+    }
+    window.rainbowizeText = rainbowize;
+
+    // =========================================================
     // 1. PARALLAX EFFECT CHO CHỮ 2026
     // =========================================================
     const parallaxLayer = document.querySelector('.parallax-layer');
@@ -206,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selectedFiles.length === 0) return;
 
             if (!GOOGLE_DRIVE_UPLOAD_URL || GOOGLE_DRIVE_UPLOAD_URL.includes('DÁN_WEB_APP_URL')) {
-                alert('Chưa cấu hình nơi lưu ảnh (Google Drive). Xem hướng dẫn trong file google-drive-upload.gs nhé!');
+                showToast('Chưa cấu hình nơi lưu ảnh (Google Drive). Xem hướng dẫn trong file google-drive-upload.gs nhé!', 'error');
                 return;
             }
 
@@ -237,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.status === 'success') {
                     sendBtn.innerText = 'ĐÃ GỬI THÀNH CÔNG! ✅';
                     sendBtn.style.background = 'var(--neon-green)';
+                    showToast(`Đã gửi ${filesPayload.length} ảnh thành công! Cảm ơn homie 💙`, 'success');
                     selectedFiles = [];
                     renderPreviews();
                     setTimeout(() => {
@@ -249,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error('Lỗi gửi ảnh lên Drive:', err);
-                alert('Gửi ảnh thất bại rồi 😢 Kiểm tra lại mạng hoặc thử lại sau nha!');
+                showToast('Gửi ảnh thất bại rồi 😢 Kiểm tra lại mạng hoặc thử lại sau nha!', 'error');
                 sendBtn.innerText = originalText;
                 sendBtn.style.opacity = '1';
                 sendBtn.disabled = false;
@@ -359,11 +409,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderInviteName(allNamesStr);
 
                     if (successModal) {
-                        successModal.querySelector('h3').innerText = "ĐÃ CHỐT ĐƠN! 🚀";
+                        const titleEl = successModal.querySelector('h3');
+                        titleEl.innerHTML = '';
+                        titleEl.appendChild(rainbowize('ĐÃ CHỐT ĐƠN!'));
+                        titleEl.appendChild(document.createTextNode(' 🚀'));
                         successModal.querySelector('p').innerText = "Đã nhận được thông tin xác nhận của bạn. Hẹn gặp nhé!";
                         successModal.classList.add('active'); 
                     } else {
-                        alert("Gửi thành công rồi nhé!");
+                        showToast("Gửi thành công rồi nhé!", 'success');
                     }
                     
                     form.reset(); 
