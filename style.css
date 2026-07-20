@@ -149,34 +149,18 @@ body::before {
 .name-stars-left { top: -45px; left: -20px; width: 38px; --tilt: -15deg; z-index: 5; }
 .invite-effect { top: 5px; left: -50px; width: 80px; --tilt: -140deg; z-index: 6; }
 /* ==========================================================================
-   CHỮ KÝ BẰNG MASK-IMAGE (ĐỔI MÀU SIÊU TỐC)
+   CHỮ KÝ BẰNG VIDEO THẬT (mix-blend-mode: lighten để nền đen "biến mất")
    ========================================================================== */
 .signature-right { 
-    top: 103px; 
+    top: 105px; 
     left: 415px; 
-    width: 110px; 
-    height: 67px;
+    width: 115px; 
+    height: 57px;
     --tilt: -10deg; 
     border: none !important;
     box-shadow: none !important;
-    
-    /* 1. Nhúng bức ảnh làm mặt nạ cắt nền */
-    -webkit-mask: url('signature.png') no-repeat center / contain;
-    mask: url('signature.png') no-repeat center / contain;
-    
-    /* 2. 🚀 BÚT PHÉP THUẬT Ở ĐÂY: Thích màu gì, gõ màu đó! */
-    background-color: var(--royal-blue); 
-    /* Thử vài màu khác xem sao: var(--hot-pink), var(--charcoal-black), #FF5733... */
-    
-    /* 3. Bóng đổ nhẹ cho chữ ký nổi bật trên mặt giấy */
-    filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.15));
-
-    /* 4. ✍️ Hiệu ứng "tự ký" 1 lần khi tải trang - mực hiện dần từ trái sang phải */
-    clip-path: inset(0 100% 0 0);
-    animation: signatureDraw 1.3s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
-}
-@keyframes signatureDraw {
-    to { clip-path: inset(0 0% 0 0); }
+    object-fit: contain;
+    pointer-events: none;
 }
 .person-heart-left { top: 40%; left: -60px; width: 55px; --tilt: -20deg; }
 .person-stars-left { top: auto; left: auto; right: -75px; bottom: 20%; width: 40px; --tilt: 15deg; }
@@ -511,11 +495,12 @@ body::before {
 .street-form input:focus, .street-form textarea:focus { outline: none; background: rgba(255, 255, 255, 0.8); border-bottom: 2px solid var(--charcoal-black); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 
 .submit-btn { 
-    background: var(--royal-blue); color: var(--white); border: var(--border-thick); padding: 0 10px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; box-shadow: 4px 4px 0 var(--charcoal-black); height: 48px; width: 100%; font-weight: 900; transition: all 0.25s ease; margin-top: auto; white-space: nowrap; font-family: 'Space Grotesk', sans-serif;
+    background: var(--royal-blue); color: var(--white); border: var(--border-thick); padding: 0 10px; font-size: 1.4rem; border-radius: 8px; cursor: pointer; box-shadow: 4px 4px 0 var(--charcoal-black); height: 48px; width: 100%; transition: all 0.25s ease; margin-top: auto; white-space: nowrap;
+    transform: rotate(-1.5deg);
 }
-.submit-btn:hover { background: #FDFBF7; color: var(--charcoal-black); transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--charcoal-black); }
-.submit-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--charcoal-black); background: var(--royal-blue); color: var(--white); }
-.submit-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: 4px 4px 0 var(--charcoal-black); }
+.submit-btn:hover { background: #FDFBF7; color: var(--charcoal-black); transform: rotate(-1.5deg) translate(-3px, -3px); box-shadow: 7px 7px 0 var(--charcoal-black); }
+.submit-btn:active { transform: rotate(-1.5deg) translate(2px, 2px); box-shadow: 2px 2px 0 var(--charcoal-black); background: var(--royal-blue); color: var(--white); }
+.submit-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: rotate(-1.5deg); box-shadow: 4px 4px 0 var(--charcoal-black); }
 
 /* FOOTER & MODALS */
 .street-footer {
@@ -610,7 +595,7 @@ body::before {
     
     /* Ẩn bớt web sticker rườm rà, còn chữ ký thì thu nhỏ lại để hiện trên mobile */
     .person-web-right { display: none !important; }
-    .signature-right { width: 60px; height: 37px; top: 40px; left: 215px; bottom: auto; right: auto; }
+    .signature-right { width: 65px; height: 32px; top: 42px; left: 215px; bottom: auto; right: auto; }
 
     /* Sao góc trên + trái tim cạnh ảnh chính - thu nhỏ và kéo vào để không bị cắt mất bởi overflow:hidden */
     .name-stars-left { width: 18px; top: 55px; left: -22px; right: auto; z-index: 5; --tilt: -28deg; }
