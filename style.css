@@ -80,6 +80,19 @@ body::before {
 }
 
 /* ==========================================================================
+   POLAROID PHOTO DROP - ảnh random từ Google Drive thay cho sticker khi D-Day tới
+   (phần override filter/border/box-shadow chính được set bằng JS inline !important
+   để chắc chắn đè được rule sticker phía dưới, ở đây chỉ thêm hiệu ứng xuất hiện)
+   ========================================================================== */
+.polaroid-photo {
+    animation: polaroidPopIn 0.5s ease-out !important;
+}
+@keyframes polaroidPopIn {
+    0% { opacity: 0; transform: scale(0.5) rotate(-8deg); }
+    100% { opacity: 1; }
+}
+
+/* ==========================================================================
    VIỀN STICKER TRẮNG (DÙNG DROP-SHADOW KÉP)
    ========================================================================== */
 .hero-decor:not(.signature-right), .bento-decor, .bento-person, .main-person, .scatter-item {
@@ -109,8 +122,9 @@ body::before {
     animation: none !important;
     transform: none !important;
 }
-/* Chữ ký: không float lắc lư như sticker khác, nhưng VẪN cho phép chạy hiệu ứng riêng (tự ký) */
-.signature-right { transform: none !important; }
+/* Chữ ký: đứng yên hoàn toàn, không float lắc lư như sticker khác (tắt animation luôn,
+   không chỉ override transform, để tránh trình duyệt phải tính lại animation mỗi frame -> giật) */
+.signature-right { animation: none !important; transform: none !important; }
 
 /* Đứng yên nhưng vẫn giữ nghiêng tĩnh riêng cho từng sticker */
 .disco-left { animation: none !important; transform: rotate(-25deg) !important; }

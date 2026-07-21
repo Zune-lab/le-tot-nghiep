@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const GOOGLE_DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbxTuMTeqhPyjgRB7VsuTpOEUQqKL8qH4l3zzheTGYSP1s6shkUiIDxoFdGa6BeguMwqPA/exec';
 
+    // Dùng CHUNG 1 Web App với GOOGLE_DRIVE_UPLOAD_URL ở trên (doGet của cùng
+    // script google-drive-upload.gs) để lấy danh sách ảnh khách đã gửi,
+    // dùng cho hiệu ứng "Polaroid Photo Drop".
+    const GOOGLE_DRIVE_PHOTOS_API_URL = GOOGLE_DRIVE_UPLOAD_URL;
+
     // =========================================================
     // 0.5. NHỚ TÊN KHÁCH (LOCAL STORAGE) - đổi "invite Các bạns" thành "invited <tên>"
     //      nếu khách này đã từng RSVP trên máy/trình duyệt này rồi.
@@ -110,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     // 2. COUNTDOWN TIMER & MULTI-IMAGE DROP ZONE
     // =========================================================
-    const targetDate = new Date('August 6, 2026 11:00:00').getTime();
+    const targetDate = new Date('August 6, 2026 8:30:00').getTime();
 
     const updateTimer = () => {
         const now = new Date().getTime();
@@ -144,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 initDropZone(); 
             }
+            initPolaroidDrop();
             return;
         }
 
@@ -305,6 +311,97 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendBtn.disabled = false;
             }
         });
+    }
+
+    // =========================================================
+    // 2.5. POLAROID PHOTO DROP
+    //      Khi tới D-Day (countdown về 0), 1 số sticker "người" sẽ được
+    //      thay bằng ảnh polaroid random lấy từ 1 folder Google Drive.
+    //      Ảnh được xáo lại (random) mỗi khi load lại trang.
+    // =========================================================
+
+    // 👉 Chọn sticker nào sẽ biến thành ảnh polaroid bằng cách thêm/bớt
+    //    selector ở đây. Mặc định: 3 bé rìa trang + 3 bé bay quanh ảnh main
+    //    + 3 bé trong bento box (đều là ảnh "người", không đụng tới sticker trang trí).
+    const POLAROID_TARGET_SELECTORS = [
+        '.sc-new-1', '.sc-new-2', '.sc-new-3',
+        '.main-float-1', '.main-float-2', '.main-float-3',
+        '.bento-p1', '.bento-p2', '.bento-p3'
+    ];
+
+    let polaroidDropDone = false; // chặn chạy lặp lại nhiều lần
+
+    // Xáo ngẫu nhiên 1 mảng (Fisher-Yates) - không đụng tới mảng gốc
+    function shuffleArray(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // Link thumbnail ổn định của Google, ít bị chặn hotlink hơn kiểu uc?export=view
+    function driveThumbUrl(fileId) {
+        return `https://lh3.googleusercontent.com/d/${fileId}=w500`;
+    }
+
+    // Ép 1 thẻ <img> sticker thành khung ảnh polaroid, ghi đè mọi filter/border/box-shadow
+    // cũ (kể cả các rule !important có sẵn trong style.css cho sticker)
+    function turnIntoPolaroid(imgEl, photoUrl, caption) {
+        imgEl.classList.add('polaroid-photo');
+        imgEl.src = photoUrl;
+        imgEl.alt = caption || 'Ảnh kỷ niệm';
+        imgEl.style.setProperty('background', '#ffffff', 'important');
+        imgEl.style.setProperty('padding', '8% 8% 22% 8%', 'important');
+        imgEl.style.setProperty('box-sizing', 'border-box', 'important');
+        imgEl.style.setProperty('object-fit', 'cover', 'important');
+        imgEl.style.setProperty('aspect-ratio', '4 / 5', 'important');
+        imgEl.style.setProperty('filter', 'none', 'important');
+        imgEl.style.setProperty('box-shadow', '4px 4px 0 rgba(44,53,57,0.2)', 'important');
+        imgEl.style.setProperty('border', '1px solid rgba(44,53,57,0.25)', 'important');
+    }
+
+    async function initPolaroidDrop() {
+        if (polaroidDropDone) return;
+
+        if (!GOOGLE_DRIVE_PHOTOS_API_URL) {
+            console.warn('Chưa cấu hình GOOGLE_DRIVE_PHOTOS_API_URL nên bỏ qua hiệu ứng Polaroid Photo Drop.');
+            return;
+        }
+
+        const targets = POLAROID_TARGET_SELECTORS
+            .map(sel => document.querySelector(sel))
+            .filter(Boolean);
+        if (targets.length === 0) return;
+
+        try {
+            const res = await fetch(GOOGLE_DRIVE_PHOTOS_API_URL);
+            const data = await res.json();
+
+            if (data.status !== 'success' || !Array.isArray(data.photos) || data.photos.length === 0) {
+                throw new Error(data.message || 'Folder Drive không có ảnh nào.');
+            }
+
+            // Xáo ngẫu nhiên -> mỗi lần load trang thứ tự ảnh khác nhau
+            const shuffled = shuffleArray(data.photos);
+
+            targets.forEach((imgEl, i) => {
+                const photo = shuffled[i % shuffled.length]; // lặp vòng nếu ảnh ít hơn số khung sticker
+                const url = driveThumbUrl(photo.id);
+
+                // Preload trước để nếu ảnh lỗi/không public thì giữ nguyên sticker cũ,
+                // không để lộ khung ảnh vỡ
+                const preload = new Image();
+                preload.onload = () => turnIntoPolaroid(imgEl, url, photo.name);
+                preload.onerror = () => console.warn('Ảnh Drive lỗi, giữ sticker cũ:', photo.name || photo.id);
+                preload.src = url;
+            });
+
+            polaroidDropDone = true;
+        } catch (err) {
+            console.warn('Không lấy được ảnh từ Google Drive cho Polaroid Photo Drop:', err);
+        }
     }
 
     // =========================================================
