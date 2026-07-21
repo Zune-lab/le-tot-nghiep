@@ -176,6 +176,8 @@ body::before {
     object-fit: contain;
     pointer-events: none;
 }
+/* Sticker mèo: kế bên tên, nằm phía trên chữ ký (signature top:105px/left:415px) */
+.name-cat-sticker { top: 5px; left: 425px; width: 95px; --tilt: 10deg; z-index: 6; }
 .person-heart-left { top: 40%; left: -60px; width: 55px; --tilt: -20deg; }
 .person-stars-left { top: auto; left: auto; right: -75px; bottom: 20%; width: 40px; --tilt: 15deg; }
 .person-web-right { bottom: 8%; right: -30px; width: 65px; --tilt: -5deg; }
@@ -295,6 +297,10 @@ body::before {
     content: ''; position: absolute; left: -6px; right: -6px; bottom: 3px; height: 42%;
     background: var(--rainbow-3); opacity: 0.6; transform: rotate(-1.2deg); border-radius: 3px; z-index: -1;
 }
+.event-address {
+    font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.1rem; font-weight: 700;
+    color: var(--royal-blue); margin-top: 4px; transform: rotate(-0.6deg);
+}
 .event-invite { font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 2rem; margin-top: 15px; }
 .event-invite u { color: var(--rainbow-5); text-decoration-color: var(--rainbow-3); text-decoration-thickness: 3px; text-underline-offset: 3px; }
 .event-credit {
@@ -322,6 +328,7 @@ body::before {
 .box-countdown { animation-delay: 0.1s; }
 .box-contact { animation-delay: 0.2s; }
 .box-agenda { animation-delay: 0.3s; }
+.box-note { animation-delay: 0.35s; }
 .box-rsvp { animation-delay: 0.4s; }
 
 .button-sticker { bottom: -35px; right: -15px; width: 45px; --tilt: -10deg; }
@@ -335,7 +342,44 @@ body::before {
 .box-countdown { grid-column: 1 / 3; display: flex; align-items: center; justify-content: center; background: var(--sky-blue); z-index: 30 !important; }
 .box-contact { grid-column: 3 / 4; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20 !important; }
 .box-agenda { grid-column: 1 / 4; display: flex; flex-direction: column; justify-content: center; z-index: 10 !important; }
+.box-note { grid-column: 1 / 4; z-index: 15 !important; }
 .box-rsvp { grid-column: 1 / 4; background: #FFFDF5; z-index: 40 !important; }
+
+/* ==========================================================================
+   GIẤY NOTE GỬI XE & LIÊN HỆ
+   ========================================================================== */
+.box-note {
+    background: #FFFDF5;
+    border: 2px dashed rgba(44, 53, 57, 0.35) !important;
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.07);
+    text-align: center;
+    transform: rotate(-1deg);
+    padding: 34px 25px 28px 25px;
+}
+.box-note:hover { transform: rotate(-1deg) translate(-4px, -4px); }
+
+.note-tape {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(-3deg);
+    width: 100px; height: 28px; background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(44, 53, 57, 0.15); box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.08);
+}
+.note-heart-sticker { top: -22px; left: -10px; width: 50px; --tilt: -18deg; z-index: 5; }
+.note-star-sticker { bottom: -18px; right: -12px; width: 48px; --tilt: 20deg; z-index: 5; }
+
+.note-title {
+    font-family: 'Patrick Hand', 'Caveat', cursive; font-weight: 700; font-size: 1.8rem;
+    position: relative; display: inline-block; margin-bottom: 12px; color: var(--charcoal-black);
+    transform: rotate(-1.5deg); z-index: 1;
+}
+.note-title::before {
+    content: ''; position: absolute; left: -8px; right: -8px; bottom: 2px; height: 42%;
+    background: var(--rainbow-3); opacity: 0.6; transform: rotate(-1deg); border-radius: 3px; z-index: -1;
+}
+.note-line {
+    font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.25rem; line-height: 1.75;
+    max-width: 560px; margin: 6px auto; color: var(--charcoal-black);
+}
+.note-italic { font-style: italic; color: var(--rainbow-5); font-weight: 700; }
 
 .timer { display: flex; gap: 15px; align-items: center; }
 .colon { font-size: 2.5rem; font-weight: 900; margin-bottom: 20px; color: var(--white); font-family: 'Space Grotesk', sans-serif; }
@@ -610,6 +654,12 @@ body::before {
     /* Ẩn bớt web sticker rườm rà, còn chữ ký thì thu nhỏ lại để hiện trên mobile */
     .person-web-right { display: none !important; }
     .signature-right { width: 65px; height: 32px; top: 42px; left: 215px; bottom: auto; right: auto; }
+    .name-cat-sticker { width: 50px; top: 0px; left: 220px; animation: none !important; transform: none !important; }
+
+    .note-line { font-size: 1.05rem; max-width: none; }
+    .note-title { font-size: 1.5rem; }
+    .note-heart-sticker { width: 34px; top: -16px; left: -8px; }
+    .note-star-sticker { width: 32px; bottom: -14px; right: -8px; }
 
     /* Sao góc trên + trái tim cạnh ảnh chính - thu nhỏ và kéo vào để không bị cắt mất bởi overflow:hidden */
     .name-stars-left { width: 18px; top: 55px; left: -22px; right: auto; z-index: 5; --tilt: -28deg; }
@@ -699,7 +749,7 @@ body::before {
     
     /* Grid bento box dọc */
     .bento-grid { grid-template-columns: 1fr; }
-    .box-countdown, .box-contact, .box-agenda, .box-rsvp { grid-column: 1 / -1; }
+    .box-countdown, .box-contact, .box-agenda, .box-note, .box-rsvp { grid-column: 1 / -1; }
     
     .street-form { flex-direction: column; align-items: stretch; }
     .form-group { width: 100%; }
