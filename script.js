@@ -12,7 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dùng CHUNG 1 Web App với GOOGLE_DRIVE_UPLOAD_URL ở trên (doGet của cùng
     // script google-drive-upload.gs) để lấy danh sách ảnh khách đã gửi,
     // dùng cho hiệu ứng "Polaroid Photo Drop".
-    const GOOGLE_DRIVE_PHOTOS_API_URL = GOOGLE_DRIVE_UPLOAD_URL;
+    const GOOGLE_DRIVE_PHOTOS_API_URL = 'https://script.google.com/macros/s/AKfycbxTuMTeqhPyjgRB7VsuTpOEUQqKL8qH4l3zzheTGYSP1s6shkUiIDxoFdGa6BeguMwqPA/exec';
+
+    let polaroidDropDone = false; // chặn chạy lặp lại nhiều lần
+
+    
+    // 👉 Chọn sticker nào sẽ biến thành ảnh polaroid bằng cách thêm/bớt
+    //    selector ở đây. Mặc định: 3 bé rìa trang + 3 bé bay quanh ảnh main
+    //    + 3 bé trong bento box (đều là ảnh "người", không đụng tới sticker trang trí).
+    const POLAROID_TARGET_SELECTORS = [
+        '.sc-new-1', '.sc-new-2', '.sc-new-3',
+        '.main-float-1', '.main-float-2', '.main-float-3',
+        '.bento-p1', '.bento-p2', '.bento-p3'
+    ];
 
     // =========================================================
     // 0.5. NHỚ TÊN KHÁCH (LOCAL STORAGE) - đổi "invite Các bạns" thành "invited <tên>"
@@ -320,17 +332,6 @@ document.addEventListener('DOMContentLoaded', () => {
     //      Ảnh được xáo lại (random) mỗi khi load lại trang.
     // =========================================================
 
-    // 👉 Chọn sticker nào sẽ biến thành ảnh polaroid bằng cách thêm/bớt
-    //    selector ở đây. Mặc định: 3 bé rìa trang + 3 bé bay quanh ảnh main
-    //    + 3 bé trong bento box (đều là ảnh "người", không đụng tới sticker trang trí).
-    const POLAROID_TARGET_SELECTORS = [
-        '.sc-new-1', '.sc-new-2', '.sc-new-3',
-        '.main-float-1', '.main-float-2', '.main-float-3',
-        '.bento-p1', '.bento-p2', '.bento-p3'
-    ];
-
-    let polaroidDropDone = false; // chặn chạy lặp lại nhiều lần
-
     // Xáo ngẫu nhiên 1 mảng (Fisher-Yates) - không đụng tới mảng gốc
     function shuffleArray(arr) {
         const a = [...arr];
@@ -348,18 +349,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ép 1 thẻ <img> sticker thành khung ảnh polaroid, ghi đè mọi filter/border/box-shadow
     // cũ (kể cả các rule !important có sẵn trong style.css cho sticker)
+    // Ép 1 thẻ <img> sticker thành khung ảnh polaroid
     function turnIntoPolaroid(imgEl, photoUrl, caption) {
         imgEl.classList.add('polaroid-photo');
         imgEl.src = photoUrl;
         imgEl.alt = caption || 'Ảnh kỷ niệm';
+        
+        // FIX: Dùng border thay cho padding để tạo khung trắng
         imgEl.style.setProperty('background', '#ffffff', 'important');
-        imgEl.style.setProperty('padding', '8% 8% 22% 8%', 'important');
+        imgEl.style.setProperty('padding', '0', 'important'); // Reset padding
+        imgEl.style.setProperty('border', '8px solid #ffffff', 'important'); // Viền trắng 3 góc
+        imgEl.style.setProperty('border-bottom', '32px solid #ffffff', 'important'); // Viền trắng dày ở đáy
+        
+        // Giữ nguyên tỷ lệ ảnh bên trong
         imgEl.style.setProperty('box-sizing', 'border-box', 'important');
         imgEl.style.setProperty('object-fit', 'cover', 'important');
         imgEl.style.setProperty('aspect-ratio', '4 / 5', 'important');
         imgEl.style.setProperty('filter', 'none', 'important');
-        imgEl.style.setProperty('box-shadow', '4px 4px 0 rgba(44,53,57,0.2)', 'important');
-        imgEl.style.setProperty('border', '1px solid rgba(44,53,57,0.25)', 'important');
+        
+        // Tạo đổ bóng và đường viền mỏng bên ngoài bằng box-shadow
+        imgEl.style.setProperty('box-shadow', '0 0 0 1px rgba(44,53,57,0.15), 4px 4px 0 rgba(44,53,57,0.2)', 'important');
     }
 
     async function initPolaroidDrop() {
@@ -508,9 +517,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (successModal) {
                         const titleEl = successModal.querySelector('h3');
                         titleEl.innerHTML = '';
-                        titleEl.appendChild(rainbowize('ĐÃ CHỐT ĐƠN!'));
-                        titleEl.appendChild(document.createTextNode(' 🚀'));
-                        successModal.querySelector('p').innerText = "Đã nhận được thông tin xác nhận của bạn. Hẹn gặp nhé!";
+                        titleEl.appendChild(rainbowize('CHỐT KÈO RỒI NHA!'));
+                        titleEl.appendChild(document.createTextNode(' 🎓'));
+                        successModal.querySelector('p').innerText = "Đã lưu thông tin của bạn rồi nhé! Hẹn gặp ngày 6.8 tại SGU 💙";
                         successModal.classList.add('active'); 
                     } else {
                         showToast("Gửi thành công rồi nhé!", 'success');
@@ -549,6 +558,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Nếu ngắn hơn 150px -> Cho phép phình to và TẮT thanh cuộn
                 this.style.height = newHeight + 'px';
                 this.style.overflowY = 'hidden';
+            }
+        });
+
+        // 4. Khi rời khỏi ô mà chưa gõ gì (trống) -> trả khung về đúng chuẩn mặc định
+        textareaMsg.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.style.height = '';
+                this.style.overflowY = '';
             }
         });
     }
