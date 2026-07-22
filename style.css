@@ -85,11 +85,19 @@ body::before {
    để chắc chắn đè được rule sticker phía dưới, ở đây chỉ thêm hiệu ứng xuất hiện)
    ========================================================================== */
 .polaroid-photo {
-    animation: polaroidPopIn 0.5s ease-out !important;
+    /* 🚀 FIX: animation cũ (polaroidPopIn) ghi đè mất animation stickerFloat vốn
+       tạo góc nghiêng --tilt riêng cho từng ảnh, nên sau khi pop-in chạy xong
+       (0.5s) mọi ảnh polaroid đều rơi về thẳng đứng 0deg, nhìn cứng/nhàm. Thêm
+       "forwards" + để keyframe kết thúc ở rotate(var(--tilt)) để ảnh giữ đúng
+       góc nghiêng lệch tự nhiên như 1 tấm ảnh dán scrapbook thật. */
+    animation: polaroidPopIn 0.5s ease-out forwards !important;
+    /* Ưu tiên nổi trên các sticker/label cùng khu vực (ví dụ peek-sticker,
+       decor khác) để ảnh polaroid không bị vật khác đè lên khi có chạm mép. */
+    z-index: 90 !important;
 }
 @keyframes polaroidPopIn {
     0% { opacity: 0; transform: scale(0.5) rotate(-8deg); }
-    100% { opacity: 1; }
+    100% { opacity: 1; transform: rotate(var(--tilt, -6deg)); }
 }
 
 /* ==========================================================================
@@ -193,10 +201,20 @@ body::before {
 .agenda-pin { top: -20px; left: -20px; width: 40px; --tilt: -55deg; z-index: 10; }
 
 /* ẢNH VỆ TINH BAY QUANH ẢNH MAIN */
+/* 🚀 FIX ĐÈ NỘI DUNG: khi lên polaroid (khung đục, không còn trong suốt như
+   sticker), main-float-1 với top:-32px từng lấn vào đáy chữ "Bao Anh", còn
+   main-float-2 với right:-100px từng chồng lên chữ ký (.signature-right, nằm
+   ở khoảng left:415-530px trong balloon-name-container). Kéo cả 2 lại gần ảnh
+   main hơn để né 2 khu vực đó hoàn toàn. */
 .main-float-1 { width: 120px; top: -32px; left: -105px; --tilt: -15deg; z-index: 6; }
 .main-float-2 { width: 210px; top: 25px; right: -100px; --tilt: 14deg; z-index: 6; }
 .main-float-3 { width: 110px; bottom: -15px; left: -75px; --tilt: 10deg; z-index: 6; }
-.main-float-1:hover, .main-float-2:hover, .main-float-3:hover { transform: scale(1.15) !important; z-index: 50; }
+/* Bé mới thêm, lấp khoảng trống giữa main-float-1 (trên) và main-float-3/ảnh chim (dưới).
+   Ẩn hoàn toàn ở trạng thái bình thường - chỉ hiện ra khi JS đổi thành polaroid
+   (ảnh khách gửi lên), tránh có 1 sticker "vô danh" nằm sẵn ở đó lúc bình thường. */
+.main-float-4 { width: 100px; top: 130px; left: -100px; --tilt: -8deg; z-index: 6; opacity: 0; }
+.main-float-4.polaroid-photo { opacity: 1 !important; }
+.main-float-1:hover, .main-float-2:hover, .main-float-3:hover, .main-float-4:hover { transform: scale(1.15) !important; z-index: 50; }
 
 /* CÁC STICKER NGƯỜI NẰM TRONG BENTO BOX */
 .bento-person {
@@ -209,9 +227,30 @@ body::before {
 .bento-person:hover { transform: scale(1.1) rotate(5deg); }
 .bento-card:hover .bento-person { transform: scale(1.1) rotate(5deg); }
 
-.bento-p1 { width: 150px; top: 15px; left: -0px; transform: rotate(10deg); }
-.bento-p2 { width: 140px; bottom: 15px; right: -20px; transform: rotate(-5deg); }
-.bento-p3 { width: 220px; top: -75px; right: 20px; transform: rotate(-8deg); }
+/* 🚀 FIX ĐÈ NỘI DUNG:
+   - bento-p1 top:15px từng nằm sát nhãn "COUNTDOWN" (.peek-2, top:-12px) - đẩy
+     xuống 34px để chừa khoảng cách rõ ràng.
+   - bento-p3 top:-75px từng thò lên rất cao, lấn qua khoảng gap 20px và đè vào
+     chữ ghi chú ở .box-note (box ngay phía trên) lẫn tiêu đề RSVP - kéo về
+     -15px (chỉ "ló" nhẹ lên mép trên) và phối hợp với padding-top mới của
+     .box-rsvp bên dưới để chắc chắn không chạm chữ. */
+.bento-p1 { width: 150px; top: 15px; left: -0px; transform: rotate(10deg); --tilt: 10deg; }
+.bento-p2 { width: 140px; bottom: 15px; right: -20px; transform: rotate(-5deg); --tilt: -5deg; }
+.bento-p3 { width: 220px; top: -75px; right: 20px; transform: rotate(-8deg); --tilt: -8deg; }
+
+/* ==========================================================================
+   🖥️ POLAROID PHOTO DROP - TỌA ĐỘ RIÊNG TRÊN DESKTOP (không đụng vị trí sticker mặc định)
+   Khung polaroid nền giấy trắng đục, to/dày hơn hẳn ảnh sticker mỏng trong
+   suốt, nên tọa độ mặc định phía trên (dành cho sticker) khi giữ nguyên sẽ bị
+   đè lên chữ ở vài chỗ. Toạ độ "né chữ" chỉ áp dụng riêng cho trạng thái
+   polaroid qua class .polaroid-photo (JS tự thêm class này) - sticker ở
+   trạng thái bình thường không bị ảnh hưởng. */
+.sc-new-1.polaroid-photo { top: 34% !important; }
+.main-float-1.polaroid-photo { top: -8px !important; }
+.main-float-2.polaroid-photo { top: 40px !important; right: -65px !important; }
+.bento-p1.polaroid-photo { top: 34px !important; }
+.bento-p2.polaroid-photo { width: 115px !important; right: -55px !important; }
+.bento-p3.polaroid-photo { top: -15px !important; right: 12px !important; }
 
 /* HERO SECTION COMPONENTS */
 .handwritten-invite {
@@ -228,7 +267,7 @@ body::before {
     background: var(--rainbow-3); opacity: 0.55; z-index: -1; transform: rotate(-1deg); border-radius: 2px;
 }
 
-.balloon-name-container { position: relative; display: block; width: fit-content; margin: 0 auto -5px auto; z-index: 4; }
+.balloon-name-container { position: relative; display: block; width: fit-content; margin: 0 auto -5px auto; z-index: 15; }
 .balloon-name-img {
     width: 420px;
     aspect-ratio: 1180 / 303;
@@ -339,7 +378,12 @@ body::before {
 .box-contact { grid-column: 3 / 4; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20 !important; }
 .box-agenda { grid-column: 1 / 4; display: flex; flex-direction: column; justify-content: center; z-index: 10 !important; }
 .box-note { grid-column: 1 / 4; z-index: 15 !important; }
-.box-rsvp { grid-column: 1 / 4; background: #FFFDF5; z-index: 40 !important; }
+.box-rsvp {
+    grid-column: 1 / 4; background: #FFFDF5; z-index: 40 !important;
+    /* Chừa thêm khoảng trống phía trên bên phải cho bento-p3 "ló" lên mà
+       không chạm vào tiêu đề RSVP ngay bên dưới. */
+    padding-top: 55px;
+}
 
 /* ==========================================================================
    GIẤY NOTE GỬI XE & LIÊN HỆ
@@ -428,6 +472,13 @@ body::before {
 .phone-link::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 100%; height: 3px; background: var(--charcoal-black); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
 .phone-link:hover { color: var(--charcoal-black); transform: translateY(-2px); }
 .phone-link:hover::after { transform: scaleX(1); }
+
+.phone-info { display: flex; flex-direction: column; }
+.phone-owner {
+    font-family: 'Patrick Hand', 'Caveat', cursive;
+    font-size: 0.95rem; font-weight: 700; color: var(--charcoal-black);
+    opacity: 0.7; line-height: 1.1; transform: rotate(-1.5deg);
+}
 
 .box-agenda { padding: 30px 30px 85px 30px; }
 
@@ -623,6 +674,45 @@ body::before {
 .close-modal-btn:hover { background: #FDFBF7; color: var(--charcoal-black); transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--charcoal-black); }
 .close-modal-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--charcoal-black); background: var(--royal-blue); color: var(--white); }
 
+/* ===== EASTER EGG: Special Guest Modal (thiệp riêng khi tên khớp special-guest.docx) ===== */
+.special-guest-content {
+    background: linear-gradient(160deg, #FFFDF5 0%, #FFF6DA 100%);
+    box-shadow: 8px 8px 0 #E3A62F, 0 0 0 6px rgba(227, 166, 47, 0.2);
+}
+.special-guest-content h3 {
+    background: linear-gradient(90deg, #E3A62F, #C97B84, #5B7B9C, #E3A62F);
+    background-size: 300% auto;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    animation: specialGuestShine 3s linear infinite;
+}
+@keyframes specialGuestShine { to { background-position: 300% center; } }
+.special-guest-content #special-guest-message { white-space: pre-line; }
+.special-guest-content .close-modal-btn { background: #E3A62F; }
+.special-guest-content .close-modal-btn:active { background: #E3A62F; }
+
+/* ===== SUPER EASTER EGG: Super Special Guest Modal (video riêng, chỉ dành cho Ý Trinh) ===== */
+.super-special-guest-content {
+    max-width: 520px;
+    background: linear-gradient(160deg, #FFFDF5 0%, #FDEAF0 100%);
+    box-shadow: 8px 8px 0 #C97B84, 0 0 0 6px rgba(201, 123, 132, 0.2);
+}
+.super-special-guest-content h3 {
+    background: linear-gradient(90deg, #C97B84, #E3A62F, #5B7B9C, #C97B84);
+    background-size: 300% auto;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    animation: specialGuestShine 3s linear infinite;
+}
+.super-special-guest-video-wrap {
+    margin-top: 14px; border-radius: 14px; overflow: hidden;
+    border: 3px solid var(--charcoal-black); box-shadow: 5px 5px 0 rgba(44, 53, 57, 0.15);
+    background: #000;
+}
+.super-special-guest-video {
+    display: block; width: 100%; max-height: 65vh; background: #000;
+}
+.super-special-guest-content .close-modal-btn { background: #C97B84; }
+.super-special-guest-content .close-modal-btn:active { background: #C97B84; }
+
 /* 🔔 TOAST NOTIFICATIONS (gửi ảnh thành công / thất bại...) */
 #toast-container {
     position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
@@ -658,7 +748,13 @@ body::before {
         margin: 15px 0 !important; 
     }
     /* Hiển thị sticker */
-    .hero-decor, .bento-decor { display: block !important; opacity: 0.85; }
+    .hero-decor:not(.main-float-4), .bento-decor { display: block !important; opacity: 0.85; }
+
+    /* 🚀 FIX: rule ở trên (opacity: 0.85 !important trên .hero-decor) từng đè mất
+       .main-float-4 { opacity: 0 } ở phần trên file (ảnh em bé lộ ra dù chưa lên
+       polaroid). Giữ ẩn hoàn toàn trên mobile, chỉ hiện khi JS gắn .polaroid-photo. */
+    .main-float-4 { display: block !important; opacity: 0 !important; }
+    .main-float-4.polaroid-photo { opacity: 1 !important; }
     
     /* Ẩn bớt web sticker rườm rà, còn chữ ký thì thu nhỏ lại để hiện trên mobile */
     .person-web-right { display: none !important; }
@@ -703,10 +799,13 @@ body::before {
     .main-person { max-width: 190px !important; margin-bottom: 20px; }
     .person-stars-left { width: 24px; top: auto; bottom: -2%; left: auto; right: -14px; --tilt: -10deg; }
     
-    /* Thu nhỏ và kéo 3 ảnh vệ tinh lọt vào trong màn hình */
+    /* Thu nhỏ và kéo 3 ảnh vệ tinh lọt vào trong màn hình.
+       🚀 FIX ĐÈ NỘI DUNG: top âm của float-1/2 từng lấn vào chữ ký/tên đã bị
+       thu nhỏ theo mobile - kéo về gần 0 để né hẳn khu vực đó. */
     .main-float-1 { width: 75px; top: -15px; left: -35px; }
     .main-float-2 { width: 110px; top: -10px; right: -20px; --tilt: 10deg; } /* To hơn 1 chút cho dễ thấy */
     .main-float-3 { width: 70px; bottom: 0px; left: -5px; }
+    .main-float-4 { width: 55px; top: 90px; left: -25px; --tilt: -8deg; }
 
     /* Kéo dấu ! xuống thấp hơn để không bị card Countdown phía trên đè lên 1 góc */
     .exclamation-sticker { top: -14px; left: 15px; }
@@ -737,18 +836,25 @@ body::before {
 
     /* 💡 KÍCH THƯỚC VÀ TỌA ĐỘ 3 ẢNH BENTO BOX TRÊN ĐIỆN THOẠI */
     
-    /* Xóa lỗi -550px, đưa bé bay về lại góc phải trên cùng của hộp Countdown */
+    /* Xóa lỗi -550px, đưa bé bay về lại góc phải trên cùng của hộp Countdown.
+       🚀 FIX ĐÈ NỘI DUNG: top:-55px từng thò lên rất cao trên mobile (nơi các
+       box đã xếp dọc, gap chỉ 20px) - kéo về -18px, chừa đường cho box phía
+       trên (.box-contact) không bị đè, còn box-countdown thì tăng padding-top
+       ở dưới để tránh đè lên số đếm ngược. */
     .bento-p1 { width: 90px; top: -55px; right: -25px; left: auto !important; bottom: auto !important; }
     
     /* Bé đứng Call Me */
-    .bento-p2 { width: 150px; bottom: 15px; right: -15px; left: auto !important; top: auto !important; } 
+    .bento-p2 { width: 150px; bottom: 15px; right: -15px; left: auto !important; top: auto !important; }
 
     /* Căn giữa 2 số điện thoại ngay dưới chữ CALL ME */
     .contact-box { display: flex !important; flex-direction: column !important; align-items: center !important; width: 100% !important; }
     .phone-wrapper { display: flex !important; width: 100% !important; justify-content: center !important; margin-left: auto !important; margin-right: auto !important; }
     .dog-icon, .cat-icon { margin-left: -20px; }
     
-    /* Ép bé ngồi sang góc bên Phải, bỏ giới hạn chiều cao để không bị cắt xén */
+    /* Ép bé ngồi sang góc bên Phải, bỏ giới hạn chiều cao để không bị cắt xén.
+       🚀 FIX ĐÈ NỘI DUNG: top:-45px từng lấn ngược lên .box-note phía trên -
+       kéo về -12px, kết hợp padding-top của .box-rsvp (đã thêm ở phần chung)
+       để không đụng chữ "XÁC NHẬN THAM GIA". */
     .bento-p3 { width: 110px; top: -45px; right: 0px; left: auto !important; bottom: auto !important; max-height: none !important; }
     
     /* Grid bento box dọc */
@@ -767,4 +873,39 @@ body::before {
     .street-footer p::before { width: 55px; height: 16px; top: -13px; left: -8px; }
     .street-footer p { font-size: 1.2rem; }
     .street-footer span { font-size: 1.4rem; }
+
+    /* ======================================================================
+       🚀 FIX: KHI STICKER LÊN POLAROID TRÊN MOBILE - đè lên chữ/nội dung
+       Khung polaroid có nền giấy trắng đục (#FFFDF5), khác hẳn ảnh sticker
+       trong suốt, nên toạ độ cũ (vốn thiết kế cho sticker mỏng, không nền)
+       không còn phù hợp - cần toạ độ riêng, tách bằng class .polaroid-photo
+       (JS tự thêm class này khi biến sticker thành polaroid).
+       ====================================================================== */
+
+    /* Đang chồng lên đáy chữ "Bảo Anh" -> đẩy xuống thấp hơn.
+       To lên (48px -> 64px) + dịch vào phải một chút để không bị mép trái cắt. */
+    .sc-new-1.polaroid-photo { top: 34% !important; left: 5% !important; }
+
+    /* Đang lấn vào đáy chữ "Bao Anh" -> kéo lại gần ảnh main hơn */
+    .main-float-1.polaroid-photo { top: -4px !important; }
+
+    /* Đang chồng lên chữ "Bảo Anh" -> đẩy xuống thấp hơn, sát mép phải */
+    .sc-new-3.polaroid-photo { top: 30% !important; right: 2% !important; }
+
+    /* 🔍 TO LÊN theo yêu cầu (68px) -> đẩy xuống thấp hơn nữa + ra hẳn mép trái để né dòng "invite" */
+    .sc-new-2.polaroid-photo { bottom: 4% !important; left: -2% !important; }
+
+    /* 🔍 TO LÊN theo yêu cầu (92px -> 108px) -> đẩy xuống + ra ngoài mép phải xa hơn nữa để né chữ ký/tên */
+    .main-float-2.polaroid-photo { top: 26px !important; right: -55px !important; }
+
+    /* Box Countdown: đang đè nhãn "PHOTO DROP!" + tên lửa ở góc phải trên ->
+       chuyển hẳn sang góc trái dưới, chỗ trống không có chữ/sticker khác. */
+    .bento-p1.polaroid-photo { top: auto !important; right: auto !important; bottom: -12px !important; left: -16px !important; }
+
+    /* Box Contact: đang đè lên số điện thoại -> đẩy xuống thấp hơn + ra ngoài mép phải */
+    .bento-p2.polaroid-photo { bottom: 2px !important; right: -22px !important; }
+
+    /* Box RSVP: đang đè lên tiêu đề "RSVP" -> đẩy xuống dưới tiêu đề, sát mép phải.
+       To lên nhiều theo yêu cầu (60px -> 96px). */
+    .bento-p3.polaroid-photo { top: 22px !important; right: 2px !important; }
 }

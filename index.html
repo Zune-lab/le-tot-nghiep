@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Hạn chế Safari/iOS (và các trình duyệt khác) giữ cache cứng HTML khi bấm
+         reload thường - không cache index.html, còn style.css/script.js đã có
+         ?v=... riêng để chống cache (xem ghi chú cuối file). -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Bao Anh - Graduation Ceremony 2026</title>
     
     <!-- Google Fonts -->
@@ -10,8 +16,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@400;600;700&family=Special+Elite&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">  
     
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- mammoth.js: đọc trực tiếp file .docx (special-guest.docx) ngay trên trình duyệt -->
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 </head>
 <body>
 
@@ -58,6 +66,7 @@
                 <img src="pic/main13.png" alt="Bao Anh Float 1" class="hero-decor main-float-1">
                 <img src="pic/main14.png" alt="Bao Anh Float 2" class="hero-decor main-float-2">
                 <img src="pic/main7.png" alt="Bao Anh Float 3" class="hero-decor main-float-3">
+                <img src="pic/main9.png" alt="Bao Anh Float 4" class="hero-decor main-float-4">
                 <!-- Ảnh Main Trung Tâm -->
                 <img src="pic/main.png" alt="Main Bao Anh" class="main-person">
             </div>
@@ -141,11 +150,17 @@
                 <div class="contact-box">
                     <div class="phone-wrapper">
                         <img src="pic/stickers/dog.png" alt="Chó" class="phone-icon dog-icon">
-                        <a href="tel:0868481076" class="phone-link bubble-font">0868 481 076</a>
+                        <div class="phone-info">
+                            <span class="phone-owner">Banh Đòn</span>
+                            <a href="tel:0868481076" class="phone-link bubble-font">0868 481 076</a>
+                        </div>
                     </div>
                     <div class="phone-wrapper">
                         <img src="pic/stickers/girly-cat.png" alt="Mèo" class="phone-icon cat-icon">
-                        <a href="tel:0346262088" class="phone-link bubble-font">034 626 2088</a>
+                        <div class="phone-info">
+                            <a href="tel:0346262088" class="phone-link bubble-font">034 626 2088</a>
+                            <span class="phone-owner">Ý Trinh</span>
+                        </div>
                     </div>
                 </div>
             </article>
@@ -239,6 +254,36 @@
         </div>
     </div>
 
+    <!-- Easter Egg Modal: hiện khi khách RSVP đúng tên nằm trong danh sách special-guest.docx -->
+    <div id="special-guest-modal" class="modal-overlay">
+        <div class="modal-content special-guest-content">
+            <div class="modal-tape" aria-hidden="true"></div>
+            <img src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
+            <img src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
+            <img src="pic/stickers/cat-note.png" alt="Mèo xác nhận" class="modal-icon">
+            <h3 class="bubble-font">SPECIAL GUEST ✨</h3>
+            <p id="special-guest-message"></p>
+            <button class="close-modal-btn" onclick="closeModal('special-guest-modal')">ĐÓNG</button>
+        </div>
+    </div>
+
+    <!-- Super Special Guest Modal: RIÊNG cho Ý Trinh - hiện video thay vì thiệp chữ -->
+    <div id="super-special-guest-modal" class="modal-overlay">
+        <div class="modal-content super-special-guest-content">
+            <div class="modal-tape" aria-hidden="true"></div>
+            <img src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
+            <img src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
+            <h3 class="bubble-font">SUPER SPECIAL GUEST 💎✨</h3>
+            <div class="super-special-guest-video-wrap">
+                <video id="super-special-guest-video" class="super-special-guest-video" controls playsinline preload="metadata">
+                    <source src="video/y-trinh-super-special.mp4" type="video/mp4">
+                    Trình duyệt của bạn không hỗ trợ video này.
+                </video>
+            </div>
+            <button class="close-modal-btn" onclick="closeModal('super-special-guest-modal')">ĐÓNG</button>
+        </div>
+    </div>
+
     <!-- Toast Notifications (gửi ảnh thành công / thất bại...) -->
     <div id="toast-container" aria-live="polite"></div>
 
@@ -246,9 +291,9 @@
     <footer class="street-footer">
         <p>BAO ANH GRADUATION CEREMONY © 2026</p>
         <div class="footer-divider" aria-hidden="true"></div>
-        <span class="footer-credit">made with <span class="footer-heart">💙</span> by <b>Zương Nguỹn</b></span>
+        <span class="footer-credit">made with <span class="footer-heart">💙</span> by <b>Zưn Nguỹn</b></span>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=1"></script>
 </body>
 </html>

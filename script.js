@@ -22,9 +22,37 @@ document.addEventListener('DOMContentLoaded', () => {
     //    + 3 bé trong bento box (đều là ảnh "người", không đụng tới sticker trang trí).
     const POLAROID_TARGET_SELECTORS = [
         '.sc-new-1', '.sc-new-2', '.sc-new-3',
-        '.main-float-1', '.main-float-2', '.main-float-3',
+        '.main-float-1', '.main-float-2', '.main-float-3', '.main-float-4',
         '.bento-p1', '.bento-p2', '.bento-p3'
     ];
+
+    // Kích thước (width, px) RIÊNG khi lên polaroid - nhỏ hơn size sticker gốc.
+    // Lý do: ảnh chụp thật "nặng mắt" hơn nhiều so với hình minh hoạ trong suốt,
+    // nên giữ nguyên size cũ (có bé to tới 210-220px) sẽ đè mất tên/chữ ký/nội
+    // dung xung quanh. Không khai báo selector nào ở đây thì giữ nguyên size gốc.
+    const POLAROID_WIDTHS = {
+        '.sc-new-1': 78, '.sc-new-2': 82, '.sc-new-3': 76,
+        '.main-float-1': 95, '.main-float-2': 95, '.main-float-3': 90, '.main-float-4': 90,
+        '.bento-p1': 120, '.bento-p2': 115, '.bento-p3': 100
+    };
+
+    // 🚀 FIX ĐÈ NỘI DUNG TRÊN MOBILE: POLAROID_WIDTHS ở trên là size cho desktop.
+    // Trên mobile, khung sticker/ảnh vệ tinh đã được kéo sát vào trong (xem media
+    // query max-width:900px trong style.css) nên nếu vẫn giữ nguyên size desktop,
+    // khung polaroid (đục, không còn trong suốt như sticker) sẽ tràn ra ngoài và
+    // đè lên tên/chữ ký/nội dung xung quanh vốn cũng đã bị thu nhỏ theo. Set riêng
+    // 1 bộ size nhỏ hơn, ăn khớp với toạ độ mobile.
+    const POLAROID_WIDTHS_MOBILE = {
+        '.sc-new-1': 64, '.sc-new-2': 68, '.sc-new-3': 42,
+        '.main-float-1': 55, '.main-float-2': 108, '.main-float-3': 52, '.main-float-4': 50,
+        '.bento-p1': 78, '.bento-p2': 78, '.bento-p3': 96
+    };
+
+    function getPolaroidWidth(sel) {
+        const isMobile = window.matchMedia('(max-width: 900px)').matches;
+        const table = isMobile ? POLAROID_WIDTHS_MOBILE : POLAROID_WIDTHS;
+        return table[sel];
+    }
 
     // =========================================================
     // 0.5. NHỚ TÊN KHÁCH (LOCAL STORAGE) - đổi "invite Các bạns" thành "invited <tên>"
@@ -62,6 +90,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderInviteName(getSavedGuestName());
     
+    // =========================================================
+    // 0.55. EASTER EGG - ĐỌC TRỰC TIẾP FILE special-guest.docx
+    //       (KHÔNG ghi tên/lời chúc vào code, mọi nội dung nằm trong file .docx)
+    //       File cần có 1 bảng 2 cột: cột 1 = Tên, cột 2 = Lời chúc riêng.
+    //       Dòng đầu tiên của bảng được coi là header nên sẽ bị bỏ qua.
+    // =========================================================
+    let specialGuestMap = new Map(); // normalizedName -> { name, message }
+
+    // Bỏ dấu tiếng Việt + chữ thường + gọn khoảng trắng, để so khớp tên không
+    // phụ thuộc hoa/thường hay cách gõ dấu của khách.
+    function normalizeGuestName(str) {
+        return (str || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/gi, 'd')
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, ' ');
+    }
+
+    async function loadSpecialGuests() {
+        if (typeof mammoth === 'undefined') {
+            console.warn('Thiếu thư viện mammoth.js, tắt easter egg special guest.');
+            return;
+        }
+        try {
+            const res = await fetch('special-guest.docx');
+            if (!res.ok) throw new Error('Không fetch được special-guest.docx (' + res.status + ')');
+            const arrayBuffer = await res.arrayBuffer();
+            const result = await mammoth.convertToHtml({ arrayBuffer });
+
+            const parser = new DOMParser();
+            const parsedDoc = parser.parseFromString(result.value, 'text/html');
+            const rows = parsedDoc.querySelectorAll('table tr');
+
+            rows.forEach((row, idx) => {
+                if (idx === 0) return; // dòng tiêu đề của bảng
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 2) return;
+
+                const rawName = cells[0].textContent.trim();
+                const rawMsg = cells[1].textContent.trim();
+                if (!rawName) return;
+
+                // Ý Trinh (super special guest) không cần lời chúc chữ vì bạn ấy có video
+                // riêng, nên không bắt buộc phải có message như các special guest khác.
+                const isSuperSpecial = normalizeGuestName(rawName) === normalizeGuestName('Ý Trinh');
+                if (!isSuperSpecial) {
+                    if (!rawMsg) return;
+                    if (rawMsg.startsWith('(Điền lời chúc')) return; // ô placeholder chưa điền
+                }
+
+                specialGuestMap.set(normalizeGuestName(rawName), { name: rawName, message: rawMsg });
+            });
+        } catch (err) {
+            console.warn('Không đọc được special-guest.docx, easter egg sẽ tắt:', err);
+        }
+    }
+
+    loadSpecialGuests();
+
+    // Chỉ trigger easter egg khi khách RSVP ĐÚNG 1 MÌNH và tên đó khớp danh sách
+    // special guest. Đi theo nhóm (nhiều tên) thì bỏ qua, không thông báo,
+    // để tránh lộ thiệp riêng cho cả nhóm khi chỉ 1 người trong đó là special guest.
+    function findSpecialGuest(nameList) {
+        if (nameList.length !== 1) return null;
+        return specialGuestMap.get(normalizeGuestName(nameList[0])) || null;
+    }
+
+    function showSpecialGuestModal(guest) {
+        const modal = document.getElementById('special-guest-modal');
+        const msgEl = document.getElementById('special-guest-message');
+        if (!modal || !msgEl) return false;
+        msgEl.textContent = guest.message;
+        modal.classList.add('active');
+        return true;
+    }
+
+    // 🌟 SUPER SPECIAL GUEST: riêng cho "Ý Trinh" - thay vì thiệp chữ, hiện video.
+    // Tên chỉ khai báo (không phải nội dung), danh sách/tên vẫn đọc từ special-guest.docx.
+    const SUPER_SPECIAL_GUEST_NAME = normalizeGuestName('Ý Trinh');
+
+    function isSuperSpecialGuest(guest) {
+        return !!guest && normalizeGuestName(guest.name) === SUPER_SPECIAL_GUEST_NAME;
+    }
+
+    function showSuperSpecialGuestModal() {
+        const modal = document.getElementById('super-special-guest-modal');
+        const video = document.getElementById('super-special-guest-video');
+        if (!modal) return false;
+        modal.classList.add('active');
+        if (video) {
+            video.currentTime = 0;
+            // Không autoplay (để tránh bị chặn/giật), khách tự bấm play khi sẵn sàng.
+        }
+        return true;
+    }
+
     // =========================================================
     // 0.6. TOAST NOTIFICATION (thông báo nhỏ góc trên, dùng cho gửi ảnh...)
     // =========================================================
@@ -206,11 +332,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const newFiles = Array.from(files);
             const validFiles = newFiles.filter(file => file.type.startsWith('image/'));
             
-            if (validFiles.length !== newFiles.length) alert('Chỉ nhận file ảnh thôi nha homie ơi!');
-            if (selectedFiles.length + validFiles.length > 10) { alert('Mỗi lần gửi tối đa 10 ảnh thôi. Gửi từ từ nha!'); return; }
+            if (validFiles.length !== newFiles.length) showToast('Chỉ nhận file ảnh thôi nha homie ơi!', 'error');
+            if (selectedFiles.length + validFiles.length > 10) { showToast('Mỗi lần gửi tối đa 10 ảnh thôi. Gửi từ từ nha!', 'error'); return; }
             
             const oversized = validFiles.some(file => file.size > 8 * 1024 * 1024);
-            if (oversized) { alert('Có ảnh bự quá (Trên 8MB). Chọn ảnh nhẹ hơn xíu nha!'); return; }
+            if (oversized) { showToast('Có ảnh bự quá (Trên 8MB). Chọn ảnh nhẹ hơn xíu nha!', 'error'); return; }
 
             selectedFiles = [...selectedFiles, ...validFiles];
             renderPreviews();
@@ -350,21 +476,50 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ép 1 thẻ <img> sticker thành khung ảnh polaroid, ghi đè mọi filter/border/box-shadow
     // cũ (kể cả các rule !important có sẵn trong style.css cho sticker)
     // Ép 1 thẻ <img> sticker thành khung ảnh polaroid
-    function turnIntoPolaroid(imgEl, photoUrl, caption) {
+    // naturalW/naturalH: kích thước gốc của ảnh (lấy từ preload) để tự chọn khung
+    // ngang hay dọc cho phù hợp, tránh ép cứng 1 tỉ lệ khiến ảnh ngang/dọc bị cắt
+    // mất chủ thể (chỉ còn thấy toàn nền đen chẳng hạn).
+    function turnIntoPolaroid(imgEl, photoUrl, caption, naturalW, naturalH, maxWidth) {
         imgEl.classList.add('polaroid-photo');
         imgEl.src = photoUrl;
         imgEl.alt = caption || 'Ảnh kỷ niệm';
-        
+
+        // Thu nhỏ về size riêng cho polaroid (nếu có khai báo trong POLAROID_WIDTHS)
+        // để ảnh chụp thật không lấn át tên/chữ ký/nội dung xung quanh.
+        if (maxWidth) {
+            imgEl.style.setProperty('width', maxWidth + 'px', 'important');
+        }
+
+        // 🚀 FIX: viền tính THEO TỈ LỆ % của width thay vì fix cứng 8px/32px.
+        // Trước đây viền cố định khiến khung nhỏ (76-95px) bị viền nuốt mất phần
+        // ảnh, nhìn như "khung to - ảnh tí xíu ở giữa". Giờ viền co giãn theo size.
+        const effectiveWidth = maxWidth || parseFloat(getComputedStyle(imgEl).width) || 150;
+        const borderSide = Math.round(Math.max(4, Math.min(9, effectiveWidth * 0.045)));
+        const borderBottom = Math.round(Math.max(14, Math.min(30, effectiveWidth * 0.15)));
+
         // FIX: Dùng border thay cho padding để tạo khung trắng
-        imgEl.style.setProperty('background', '#ffffff', 'important');
+        imgEl.style.setProperty('background', '#FFFDF5', 'important'); // nền giấy polaroid (không còn là đen)
         imgEl.style.setProperty('padding', '0', 'important'); // Reset padding
-        imgEl.style.setProperty('border', '8px solid #ffffff', 'important'); // Viền trắng 3 góc
-        imgEl.style.setProperty('border-bottom', '32px solid #ffffff', 'important'); // Viền trắng dày ở đáy
+        imgEl.style.setProperty('border', `${borderSide}px solid #ffffff`, 'important'); // Viền trắng 3 góc
+        imgEl.style.setProperty('border-bottom', `${borderBottom}px solid #ffffff`, 'important'); // Viền trắng dày ở đáy
         
-        // Giữ nguyên tỷ lệ ảnh bên trong
         imgEl.style.setProperty('box-sizing', 'border-box', 'important');
-        imgEl.style.setProperty('object-fit', 'cover', 'important');
-        imgEl.style.setProperty('aspect-ratio', '4 / 5', 'important');
+        // 🚀 FIX: contain thay vì cover -> LUÔN thấy trọn vẹn ảnh, không bị cắt mất
+        // chủ thể dù ảnh nằm ngang hay dọc. Phần dư (nếu có) sẽ là nền giấy polaroid
+        // ở trên, trông như lề ảnh thật chứ không phải lỗi.
+        imgEl.style.setProperty('object-fit', 'contain', 'important');
+
+        // Khung tự thích ứng theo tỉ lệ ảnh gốc, kẹp trong khoảng hợp lý để không
+        // phá layout rải rác (ảnh quá dẹt/quá cao vẫn được kẹp về mức vừa phải).
+        // 🚀 FIX: siết khoảng tỉ lệ chặt hơn (trước là 0.65-1.35) để chiều cao khung
+        // không "vọt" quá lớn so với width đã set - width to nhất (bento-p2/p3 khu
+        // vực gần chữ/box khác) mà ratio 0.65 vẫn có thể cao hơn 1.5 lần width, dễ
+        // đè lên nội dung ở ngay phía trên/dưới. Khoảng 0.8-1.2 vẫn đủ tự nhiên cho
+        // ảnh ngang lẫn dọc mà chiều cao luôn nằm trong tầm kiểm soát.
+        let ratio = (naturalW && naturalH) ? naturalW / naturalH : 0.9;
+        ratio = Math.min(Math.max(ratio, 0.8), 1.2);
+        imgEl.style.setProperty('aspect-ratio', ratio.toFixed(3), 'important');
+
         imgEl.style.setProperty('filter', 'none', 'important');
         
         // Tạo đổ bóng và đường viền mỏng bên ngoài bằng box-shadow
@@ -380,8 +535,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const targets = POLAROID_TARGET_SELECTORS
-            .map(sel => document.querySelector(sel))
-            .filter(Boolean);
+            .map(sel => ({ sel, el: document.querySelector(sel) }))
+            .filter(t => t.el);
         if (targets.length === 0) return;
 
         try {
@@ -395,14 +550,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Xáo ngẫu nhiên -> mỗi lần load trang thứ tự ảnh khác nhau
             const shuffled = shuffleArray(data.photos);
 
-            targets.forEach((imgEl, i) => {
+            targets.forEach(({ sel, el: imgEl }, i) => {
                 const photo = shuffled[i % shuffled.length]; // lặp vòng nếu ảnh ít hơn số khung sticker
                 const url = driveThumbUrl(photo.id);
 
                 // Preload trước để nếu ảnh lỗi/không public thì giữ nguyên sticker cũ,
                 // không để lộ khung ảnh vỡ
                 const preload = new Image();
-                preload.onload = () => turnIntoPolaroid(imgEl, url, photo.name);
+                preload.onload = () => turnIntoPolaroid(imgEl, url, photo.name, preload.naturalWidth, preload.naturalHeight, getPolaroidWidth(sel));
                 preload.onerror = () => console.warn('Ảnh Drive lỗi, giữ sticker cũ:', photo.name || photo.id);
                 preload.src = url;
             });
@@ -457,12 +612,12 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             if (Number.isNaN(countNumber) || countNumber < 1) {
-                alert("Số lượng homie phải lớn hơn hoặc bằng 1!");
+                showToast("Số lượng homie phải lớn hơn hoặc bằng 1!", 'error');
                 resetSubmitButton(); return;
             }
 
             if (!allNamesStr || allNamesStr.length < 2) {
-                alert("Vui lòng nhập tên hợp lệ (ít nhất 2 ký tự)!");
+                showToast("Vui lòng nhập tên hợp lệ (ít nhất 2 ký tự)!", 'error');
                 resetSubmitButton(); return;
             }
 
@@ -470,11 +625,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (nameList.length !== countNumber) {
                 if (countNumber === 1 && nameList.length > 1) {
-                    alert("Đi 1 người sao nhập nhiều tên vậy? Kiểm tra lại nha!");
+                    showToast("Đi 1 người sao nhập nhiều tên vậy? Kiểm tra lại nha!", 'error');
                 } else if (nameList.length < countNumber) {
-                    alert(`Bạn chọn ${countNumber} người. Nhớ nhập đủ ${countNumber} tên.`);
+                    showToast(`Bạn chọn ${countNumber} người. Nhớ nhập đủ ${countNumber} tên.`, 'error');
                 } else {
-                    alert(`Dư tên rồi homie!`);
+                    showToast(`Dư tên rồi homie!`, 'error');
                 }
                 resetSubmitButton(); return;
             }
@@ -483,9 +638,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (let i = 0; i < nameList.length; i++) {
                 const name = nameList[i];
-                if (name === "") { alert("Danh sách tên bị dư dấu phẩy."); resetSubmitButton(); return; }
-                if (name.length < 2) { alert(`Tên "${name}" ngắn quá.`); resetSubmitButton(); return; }
-                if (!validNameRegex.test(name)) { alert(`Tên "${name}" có ký tự lạ.`); resetSubmitButton(); return; }
+                if (name === "") { showToast("Danh sách tên bị dư dấu phẩy.", 'error'); resetSubmitButton(); return; }
+                if (name.length < 2) { showToast(`Tên "${name}" ngắn quá.`, 'error'); resetSubmitButton(); return; }
+                if (!validNameRegex.test(name)) { showToast(`Tên "${name}" có ký tự lạ.`, 'error'); resetSubmitButton(); return; }
             }
 
             if (rawMsg) {
@@ -494,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Giữ nguyên đoạn chống spam
                 if (msgNoSpaces.length >= 4 && /^(.)\1+$/.test(msgNoSpaces)) {
-                    alert("Lời nhắn toàn chữ lặp thế homie? Ghi gì đó ý nghĩa xíu đi!");
+                    showToast("Lời nhắn toàn chữ lặp thế homie? Ghi gì đó ý nghĩa xíu đi!", 'error');
                     resetSubmitButton(); 
                     return;
                 }
@@ -509,27 +664,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (error) {
                     console.error("Supabase Error:", error);
-                    alert("Lỗi khi lưu dữ liệu. Vui lòng kiểm tra lại cấu hình nhé!");
+                    showToast("Lỗi khi lưu dữ liệu. Vui lòng kiểm tra lại cấu hình nhé!", 'error');
                 } else {
                     saveGuestName(allNamesStr);
                     renderInviteName(allNamesStr);
 
-                    if (successModal) {
-                        const titleEl = successModal.querySelector('h3');
-                        titleEl.innerHTML = '';
-                        titleEl.appendChild(rainbowize('CHỐT KÈO RỒI NHA!'));
-                        titleEl.appendChild(document.createTextNode(' 🎓'));
-                        successModal.querySelector('p').innerText = "Đã lưu thông tin của bạn rồi nhé! Hẹn gặp ngày 6.8 tại SGU 💙";
+                    const specialGuest = findSpecialGuest(nameList);
+                    const specialModalShown = specialGuest
+                        ? (isSuperSpecialGuest(specialGuest)
+                            ? showSuperSpecialGuestModal()
+                            : showSpecialGuestModal(specialGuest))
+                        : false;
+
+                    if (specialModalShown) {
+                        // Đúng special guest -> ưu tiên hiện thiệp riêng (hoặc video riêng), khỏi hiện modal mặc định
+                    } else if (successModal) {
+                        // Dùng đúng nội dung mặc định có sẵn trong index.html
+                        // ("CHỐT KÈO RỒI NHA! 🎓" / "Hẹn gặp bạn iu vào ngày 6.8 tại SGU nha 💙")
+                        // cho MỌI khách thường, không ghi đè bằng JS nữa.
                         successModal.classList.add('active'); 
                     } else {
-                        showToast("Gửi thành công rồi nhé!", 'success');
+                        console.warn('Không tìm thấy #success-modal trong index.html.');
                     }
                     
                     form.reset(); 
                     guestNamesInput.placeholder = 'Who r u?';
                 }
             } catch (error) {
-                alert("Mất mạng rồi rớt mạng rồi, check WiFi lại nhé!");
+                showToast("Mất mạng rồi rớt mạng rồi, check WiFi lại nhé!", 'error');
             } finally {
                 resetSubmitButton();
             }
@@ -577,5 +739,9 @@ window.closeModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('active');
+        // Nếu modal có video (vd: super-special-guest-modal) thì pause lại khi đóng,
+        // tránh video vẫn phát ngầm sau khi khách đã đóng popup.
+        const video = modal.querySelector('video');
+        if (video) video.pause();
     }
 };
