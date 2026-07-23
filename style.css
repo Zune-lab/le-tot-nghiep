@@ -190,8 +190,12 @@ body::before {
 /* Sticker mèo: kế bên tên, nằm phía trên chữ ký (signature top:105px/left:415px) */
 .name-cat-sticker { top: -70px; left: 425px; width: 125px; --tilt: 10deg; z-index: 6; }
 .person-heart-left { top: 40%; left: -60px; width: 55px; --tilt: -20deg; }
-.person-stars-left { top: auto; left: auto; right: -75px; bottom: 20%; width: 40px; --tilt: 15deg; }
-.person-web-right { bottom: 8%; right: -30px; width: 65px; --tilt: -5deg; }
+/* 🚀 FIX: stars và web trước đây chỉ cách nhau 12% chiều cao (bottom:20% vs
+   8%) nên khi màn hình hẹp lại nhìn dính sát vào nhau. Kéo stars lên cao hơn
+   hẳn + ra xa hơn theo chiều ngang, web giữ nguyên phía dưới, tạo khoảng
+   cách rõ ràng giữa 2 sticker. */
+.person-stars-left { top: auto; left: auto; right: -95px; bottom: 40%; width: 40px; --tilt: 15deg; }
+.person-web-right { bottom: 20%; right: -30px; width: 65px; --tilt: -5deg; }
 .note-cat-left { bottom: -20px; left: -60px; width: 85px; --tilt: -12deg; z-index: 7; }
 /* 2 Bé lấp chỗ trống khu vực thời gian */
 .note-bow-right { bottom: 40px; right: -32px; width: 60px; --tilt: -35deg; z-index: 7; }
@@ -252,6 +256,29 @@ body::before {
 .bento-p2.polaroid-photo { width: 115px !important; right: -55px !important; }
 .bento-p3.polaroid-photo { top: -15px !important; right: 12px !important; }
 
+/* 🚀 FIX: person-heart-left đứng ở khu vực bên trái ảnh main (top:40%;
+   left:-60px), đúng ngay giữa main-float-1 (trên) và main-float-3 (dưới) -
+   khi 1 trong 2 bé đó lên polaroid (khung giấy đục, không còn trong suốt)
+   sẽ đè mất hẳn sticker heart. Dùng :has() để phát hiện có ảnh polaroid nào
+   xuất hiện trong khu vực ảnh main, kéo heart xuống khoảng trống ngay dưới
+   ảnh main (không đụng float-3/float-4 ở 2 bên) để né hoàn toàn. */
+.main-person-container:has(.polaroid-photo) .person-heart-left {
+    top: auto !important;
+    left: 100px !important;
+    bottom: -28px !important;
+    z-index: 20 !important;
+}
+
+/* 🚀 FIX: rule dời main-float-4 (bên dưới) PHẢI chỉ áp dụng cho desktop.
+   Trước đây khai báo không kèm @media nên tự động đè luôn cả vị trí mobile
+   (đã set riêng trong @media max-width:900px), làm ảnh này nhảy lung tung
+   chồng lên main-float-2 trên điện thoại. */
+@media (min-width: 901px) {
+    /* main-float-4 dùng toạ độ mặc định (top:130px; left:-100px) từng đè lên chữ
+       ký "Bảo Anh" phía trên - dời qua góc dưới bên phải ảnh main, chỗ trống hơn. */
+    .main-float-4.polaroid-photo { top: auto !important; bottom: -20px !important; left: auto !important; right: -95px !important; }
+}
+
 /* HERO SECTION COMPONENTS */
 .handwritten-invite {
     font-family: 'Patrick Hand', 'Caveat', cursive; 
@@ -300,7 +327,6 @@ body::before {
 .rc4 { color: var(--rainbow-4) !important; }
 .rc5 { color: var(--rainbow-5) !important; }
 .rc6 { color: var(--rainbow-6) !important; }
-.rc7 { color: var(--rainbow-7) !important; }
 .rc-dot {
     display: inline-block;
     background: linear-gradient(135deg, var(--rainbow-1), var(--rainbow-3), var(--rainbow-4), var(--rainbow-6));
@@ -321,7 +347,7 @@ body::before {
 .ransom-word .ransom-letter:nth-child(7n+6) { background-color: var(--rainbow-6) !important; color: #fff !important; }
 .ransom-word .ransom-letter:nth-child(7n) { background-color: var(--rainbow-7) !important; color: #fff !important; }
 
-.event-details-card { position: relative; display: block; width: fit-content; margin: 15px auto 0 auto; font-family: 'Space Grotesk', sans-serif; z-index: 6; }
+.event-details-card { position: relative; display: block; width: fit-content; max-width: 100%; margin: 15px auto 0 auto; font-family: 'Space Grotesk', sans-serif; z-index: 6; box-sizing: border-box; }
 .event-date { font-size: 1.8rem; font-weight: 900; letter-spacing: 1px; }
 .event-time { font-size: 4rem; font-weight: 900; color: var(--royal-blue); line-height: 1; margin: 10px 0; }
 .event-location {
@@ -336,7 +362,10 @@ body::before {
     font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.1rem; font-weight: 700;
     color: var(--royal-blue); margin-top: 4px; transform: rotate(-0.6deg);
 }
-.event-invite { font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 2rem; margin-top: 15px; }
+/* 🚀 FIX: RSVP nhiều tên (VD 7-8 người) từng làm dòng "invited ..." dài tràn
+   ra ngoài card (vì .event-details-card có width: fit-content), đặc biệt vỡ
+   layout trên mobile. Giới hạn chiều rộng + cho xuống dòng, căn giữa cho đẹp. */
+.event-invite { font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 2rem; margin-top: 15px; max-width: 480px; overflow-wrap: break-word; word-break: break-word; text-align: center; }
 .event-invite u { color: var(--rainbow-5); text-decoration-color: var(--rainbow-3); text-decoration-thickness: 3px; text-underline-offset: 3px; }
 .event-credit {
     margin-top: 50px; font-size: 0.9rem; font-family: 'Patrick Hand', cursive; font-style: normal;
@@ -702,6 +731,37 @@ body::before {
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     animation: specialGuestShine 3s linear infinite;
 }
+.super-special-guest-gate {
+    margin-top: 16px; padding: 20px 16px; border-radius: 14px;
+    border: 3px dashed var(--charcoal-black); background: rgba(255, 255, 255, 0.55);
+}
+.super-special-guest-gate-text {
+    font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.15rem;
+    color: var(--charcoal-black); margin-bottom: 12px;
+}
+.super-special-guest-gate-row {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+}
+#super-special-guest-password {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1rem; letter-spacing: 2px;
+    padding: 10px 14px; border: 3px solid var(--charcoal-black); border-radius: 10px;
+    background: var(--white); color: var(--charcoal-black); text-align: center;
+    width: 170px; max-width: 60%; outline: none;
+}
+#super-special-guest-password:focus { border-color: #C97B84; }
+.unlock-btn {
+    background: #C97B84; color: var(--white); border: 3px solid var(--charcoal-black);
+    padding: 10px 20px; border-radius: 10px; font-weight: 900; cursor: pointer;
+    box-shadow: 4px 4px 0 var(--charcoal-black); transition: all 0.2s ease;
+    font-family: 'Space Grotesk', sans-serif;
+}
+.unlock-btn:hover { background: #FDFBF7; color: var(--charcoal-black); transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--charcoal-black); }
+.unlock-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--charcoal-black); background: #C97B84; color: var(--white); }
+.super-special-guest-gate-error {
+    margin-top: 10px; min-height: 1.2em; color: var(--alert-red);
+    font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1rem;
+}
+
 .super-special-guest-video-wrap {
     margin-top: 14px; border-radius: 14px; overflow: hidden;
     border: 3px solid var(--charcoal-black); box-shadow: 5px 5px 0 rgba(44, 53, 57, 0.15);
@@ -742,6 +802,10 @@ body::before {
     .balloon-name-img { width: 230px; }
     .ransom-letter { width: 28px; height: 38px; line-height: 34px; font-size: 1.4rem; }
 
+    /* 🚀 RSVP nhiều tên trên màn hình nhỏ - thu hẹp thêm & giảm cỡ chữ 1 chút
+       để không tràn ngang, xuống dòng gọn gàng thay vì bị cắt/tràn khỏi khung. */
+    .event-invite { max-width: 88vw; font-size: 1.6rem; }
+
     /* 🚀 Thu nhỏ thời gian và kéo 2 bé ốp sát vào 2 bên */
     .event-time { 
         font-size: 3.2rem !important; /* Bóp nhỏ số 9:30 lại cho thanh lịch */
@@ -769,7 +833,7 @@ body::before {
     /* Sao góc trên + trái tim cạnh ảnh chính - thu nhỏ và kéo vào để không bị cắt mất bởi overflow:hidden */
     .name-stars-left { width: 18px; top: 55px; left: -22px; right: auto; z-index: 5; --tilt: -28deg; }
     .invite-effect { width: 60px; top: -25px; left: -30px; --tilt: -130deg; }
-    .person-heart-left { width: 38px; top: 61%; left: auto; right: -18px; }
+    .person-heart-left { width: 38px; top: 35%; left: -14px; right: auto; }
 
     /* Góc trên cùng (Thu nhỏ trái châu xíu để chừa đất cho chữ) */
     .disco-left { width: 130px; top: -100px; left: -50px; }
@@ -908,4 +972,15 @@ body::before {
     /* Box RSVP: đang đè lên tiêu đề "RSVP" -> đẩy xuống dưới tiêu đề, sát mép phải.
        To lên nhiều theo yêu cầu (60px -> 96px). */
     .bento-p3.polaroid-photo { top: 22px !important; right: 2px !important; }
+
+    /* Heart trên mobile (top:61%; left:-14px) nằm lọt giữa main-float-1/3/4,
+       toàn bộ đều có thể đè lên nó khi lên polaroid -> kéo xuống hẳn dưới
+       đáy ảnh main, chỗ trống giữa float-3 (bên trái) và stars-left (bên
+       phải) để không bị ảnh nào che mất. */
+    .main-person-container:has(.polaroid-photo) .person-heart-left {
+        top: auto !important;
+        left: -60px !important;
+        bottom: -5px !important;
+        z-index: 20 !important;
+    }
 }

@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@400;600;700&family=Special+Elite&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">  
     
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=8">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- mammoth.js: đọc trực tiếp file .docx (special-guest.docx) ngay trên trình duyệt -->
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
@@ -273,8 +273,19 @@
             <div class="modal-tape" aria-hidden="true"></div>
             <img src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
             <img src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
-            <h3 class="bubble-font">SUPER SPECIAL GUEST 💎✨</h3>
-            <div class="super-special-guest-video-wrap">
+            <h3 class="bubble-font">Special gift 4 SUPER SPECIAL GUEST 💎✨</h3>
+
+            <!-- Cổng mật khẩu: hiện trước, phải nhập đúng mã mới lộ video bên dưới -->
+            <div id="super-special-guest-gate" class="super-special-guest-gate">
+                <p class="super-special-guest-gate-text">Nhập mật khẩu để mở quà nha 🔒</p>
+                <div class="super-special-guest-gate-row">
+                    <input type="password" id="super-special-guest-password" inputmode="numeric" autocomplete="off" placeholder="Mật khẩu...">
+                    <button type="button" id="super-special-guest-unlock-btn" class="unlock-btn bubble-font">MỞ</button>
+                </div>
+                <p id="super-special-guest-gate-error" class="super-special-guest-gate-error"></p>
+            </div>
+
+            <div id="super-special-guest-video-section" class="super-special-guest-video-wrap">
                 <video id="super-special-guest-video" class="super-special-guest-video" controls playsinline preload="metadata">
                     <source src="video/y-trinh-super-special.mp4" type="video/mp4">
                     Trình duyệt của bạn không hỗ trợ video này.
@@ -294,6 +305,6 @@
         <span class="footer-credit">made with <span class="footer-heart">💙</span> by <b>Zưn Nguỹn</b></span>
     </footer>
 
-    <script src="script.js?v=1"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>

@@ -81,7 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // bị hiểu nhầm thành thẻ HTML (chống XSS nếu ai đó nhập tên kiểu "<img onerror=...>")
     function renderInviteName(name) {
         const inviteEl = document.querySelector('.event-invite');
-        if (!inviteEl || !name) return;
+        if (!inviteEl) return;
+
+        if (!name) {
+            // Chưa có tên (chưa từng RSVP, hoặc đang gõ mà xóa hết) -> về lại mặc định
+            inviteEl.textContent = 'invite ';
+            const uDefault = document.createElement('u');
+            uDefault.textContent = 'Các bạns';
+            inviteEl.appendChild(uDefault);
+            return;
+        }
+
         inviteEl.textContent = 'invited ';
         const u = document.createElement('u');
         u.textContent = name;
@@ -176,14 +186,61 @@ document.addEventListener('DOMContentLoaded', () => {
         return !!guest && normalizeGuestName(guest.name) === SUPER_SPECIAL_GUEST_NAME;
     }
 
+    // 🔒 CỔNG MẬT KHẨU cho video: phải nhập đúng mã mới lộ video ra.
+    // Nhập đúng 1 lần trong phiên (session) này thì lần sau mở lại modal khỏi
+    // hỏi lại nữa (đóng modal không reset trạng thái đã mở khoá).
+    const SUPER_SPECIAL_GUEST_PASSWORD = '17052026';
+    let superSpecialGuestUnlocked = false;
+
+    const gateEl = document.getElementById('super-special-guest-gate');
+    const videoSectionEl = document.getElementById('super-special-guest-video-section');
+    const passwordInput = document.getElementById('super-special-guest-password');
+    const unlockBtn = document.getElementById('super-special-guest-unlock-btn');
+    const gateErrorEl = document.getElementById('super-special-guest-gate-error');
+
+    function revealSuperSpecialGuestVideo() {
+        superSpecialGuestUnlocked = true;
+        if (gateEl) gateEl.style.display = 'none';
+        if (videoSectionEl) videoSectionEl.style.display = '';
+        const video = document.getElementById('super-special-guest-video');
+        if (video) video.currentTime = 0; // Không autoplay, khách tự bấm play.
+    }
+
+    function tryUnlockSuperSpecialGuest() {
+        if (!passwordInput) return;
+        const entered = passwordInput.value.trim();
+        if (entered === SUPER_SPECIAL_GUEST_PASSWORD) {
+            if (gateErrorEl) gateErrorEl.textContent = '';
+            revealSuperSpecialGuestVideo();
+        } else {
+            if (gateErrorEl) gateErrorEl.textContent = 'Sai mật khẩu rồi, thử lại nha 🥲';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    }
+
+    if (unlockBtn) unlockBtn.addEventListener('click', tryUnlockSuperSpecialGuest);
+    if (passwordInput) {
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                tryUnlockSuperSpecialGuest();
+            }
+        });
+    }
+
     function showSuperSpecialGuestModal() {
         const modal = document.getElementById('super-special-guest-modal');
-        const video = document.getElementById('super-special-guest-video');
         if (!modal) return false;
         modal.classList.add('active');
-        if (video) {
-            video.currentTime = 0;
-            // Không autoplay (để tránh bị chặn/giật), khách tự bấm play khi sẵn sàng.
+
+        if (superSpecialGuestUnlocked) {
+            revealSuperSpecialGuestVideo();
+        } else {
+            if (gateEl) gateEl.style.display = '';
+            if (videoSectionEl) videoSectionEl.style.display = 'none';
+            if (gateErrorEl) gateErrorEl.textContent = '';
+            if (passwordInput) passwordInput.value = '';
         }
         return true;
     }
@@ -216,27 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.showToast = showToast;
 
-    // Bọc mỗi chữ trong 1 span màu cầu vồng (rc1..rc7), dùng cho tiêu đề modal
-    function rainbowize(text) {
-        const frag = document.createDocumentFragment();
-        let colorIdx = 0;
-        for (const ch of text) {
-            const span = document.createElement('span');
-            span.textContent = ch;
-            if (/\s/.test(ch)) {
-                // giữ nguyên khoảng trắng, không tính màu
-            } else if (!/[\p{L}\p{N}]/u.test(ch)) {
-                span.className = 'rc-dot';
-            } else {
-                colorIdx = (colorIdx % 7) + 1;
-                span.className = `rc${colorIdx}`;
-            }
-            frag.appendChild(span);
-        }
-        return frag;
-    }
-    window.rainbowizeText = rainbowize;
-
     // =========================================================
     // 1. PARALLAX EFFECT CHO CHỮ 2026
     // =========================================================
@@ -253,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     // 2. COUNTDOWN TIMER & MULTI-IMAGE DROP ZONE
     // =========================================================
-    const targetDate = new Date('August 6, 2026 11:00:00').getTime();
+    const targetDate = new Date('August 6, 2025 11:00:00').getTime();
 
     const updateTimer = () => {
         const now = new Date().getTime();
@@ -409,8 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sendBtn.innerText = `ĐANG GỬI ${selectedFiles.length} ẢNH... ⏳`;
 
             try {
-                const guestNameInput = document.getElementById('guestName');
-                const inputName = guestNameInput && guestNameInput.value.trim() ? guestNameInput.value.trim() : '';
+                const inputName = guestNamesInput && guestNamesInput.value.trim() ? guestNamesInput.value.trim() : '';
                 const guestName = inputName || getSavedGuestName();
 
                 const filesPayload = await Promise.all(selectedFiles.map(async (file) => ({
@@ -529,11 +564,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initPolaroidDrop() {
         if (polaroidDropDone) return;
 
-        if (!GOOGLE_DRIVE_PHOTOS_API_URL) {
-            console.warn('Chưa cấu hình GOOGLE_DRIVE_PHOTOS_API_URL nên bỏ qua hiệu ứng Polaroid Photo Drop.');
-            return;
-        }
-
         const targets = POLAROID_TARGET_SELECTORS
             .map(sel => ({ sel, el: document.querySelector(sel) }))
             .filter(t => t.el);
@@ -578,18 +608,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const guestMessageInput = document.getElementById('guestMsg');
     const successModal = document.getElementById('success-modal'); 
 
-    if(guestCountInput) {
-        guestCountInput.addEventListener('input', (e) => {
-            const val = e.target.value;
-            const count = parseInt(val);
-            // 🚀 FIX LỖI RESET CHỮ (KIỂM TRA CHỖ TRỐNG HOẶC NaN)
-            if (val === "" || isNaN(count) || count <= 1) {
-                guestNamesInput.placeholder = 'Who r u?'; // Placeholder mặc định
-            } else {
-                guestNamesInput.placeholder = 'Tên các homie (VD: Vương, Hà...)';
-            }
+    // 🚀 Cập nhật "invited ..." NGAY khi khách đang gõ tên, không cần đợi bấm submit.
+    // Gõ 1 tên hay nhiều tên (cách nhau dấu phẩy, VD: "An, Bình, Chi") thì cứ hiện
+    // nguyên như khách gõ - khớp với cách nó sẽ hiện sau khi submit thành công.
+    // Xóa trống ô thì quay lại tên đã lưu lần RSVP trước (nếu có), không thì về
+    // mặc định "Các bạns".
+    if (guestNamesInput) {
+        guestNamesInput.addEventListener('input', () => {
+            const typed = guestNamesInput.value.trim();
+            renderInviteName(typed || getSavedGuestName());
         });
     }
+
+    // 🚀 FIX: trước đây ô "YOUR NAME" tự đổi placeholder từ "Who r u?" sang
+    // "Tên các homie (VD: Vương, Hà...)" mỗi khi SL GUEST > 1. Placeholder chỉ
+    // hiện lên khi ô đang trống (kể cả sau khi gõ tên rồi xóa hết), nên nhìn như
+    // bị "đổi lại thành gợi ý sai" mỗi lần xóa tên. Giữ cố định "Who r u?" luôn,
+    // không đổi theo SL GUEST nữa.
 
     if(form) {
         form.addEventListener('submit', async (e) => {
