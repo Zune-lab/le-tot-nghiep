@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Patrick+Hand&family=Space+Grotesk:wght@500;700;900&family=Special+Elite&display=swap');
+/* Fonts đã được load qua <link> + preconnect trong <head> của index.html.
+   Đã xóa @import ở đây vì nó gây tải trùng font + chặn render CSS thêm 1 vòng
+   round-trip nữa (chờ tải xong style.css mới bắt đầu tải font, thay vì tải
+   song song ngay từ đầu như <link>). */
 
 :root {
     --cream-bg: #EFECE3;
