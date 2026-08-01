@@ -1,16 +1,4 @@
-/* Fonts đã được load qua <link> + preconnect trong <head> của index.html.
-   Đã xóa @import ở đây vì nó gây tải trùng font + chặn render CSS thêm 1 vòng
-   round-trip nữa (chờ tải xong style.css mới bắt đầu tải font, thay vì tải
-   song song ngay từ đầu như <link>). */
-
-/* 🚀 FIX ẢNH BỊ KÉO DÃN: các thẻ <img> có thuộc tính width/height (để chống
-   giật layout - CLS) nhưng CSS bên dưới chỉ set "width" theo từng class
-   (.hero-decor, .bento-decor...) mà không set "height". Nếu không có dòng
-   này, trình duyệt sẽ giữ nguyên height cố định theo thuộc tính HTML trong
-   khi width đã bị đổi theo CSS => ảnh bị bóp/kéo dãn sai tỉ lệ. "height:auto"
-   ở đây (specificity thấp) đảm bảo height LUÔN tự tính lại theo đúng tỉ lệ
-   gốc của ảnh mỗi khi có class nào đó set width riêng. */
-img { height: auto; }
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Patrick+Hand&family=Space+Grotesk:wght@500;700;900&family=Special+Elite&display=swap');
 
 :root {
     --cream-bg: #EFECE3;
@@ -923,12 +911,12 @@ body::before {
 }
 
 .super-special-guest-video-wrap {
-    margin-top: 14px; border-radius: 14px; overflow: hidden;
+    margin: 14px auto 0; border-radius: 14px; overflow: hidden;
     border: 3px solid var(--charcoal-black); box-shadow: 5px 5px 0 rgba(44, 53, 57, 0.15);
-    background: #000;
+    background: #000; max-width: 320px;
 }
 .super-special-guest-video {
-    display: block; width: 100%; max-height: 65vh; background: #000;
+    display: block; width: 100%; aspect-ratio: 9 / 16; max-height: 65vh; background: #000; border: none;
 }
 .super-special-guest-content .close-modal-btn { background: #C97B84; }
 .super-special-guest-content .close-modal-btn:active { background: #C97B84; }
