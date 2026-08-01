@@ -362,7 +362,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const link = document.createElement('a');
                 link.download = `thu-${nameSlug}.png`;
                 link.href = paddedCanvas.toDataURL('image/png');
+                // 🐛 FIX: trên Safari iOS, bấm .click() vào <a> chưa được gắn vào DOM
+                // đôi khi không tải file mà lại ĐIỀU HƯỚNG THẲNG tới ảnh (thay nguyên
+                // trang web bằng ảnh PNG tĩnh) -> trang "đứng hình", không cuộn/bấm
+                // được nữa vì đó không còn là trang web nữa. Phải gắn link vào DOM,
+                // bấm, rồi gỡ ra ngay sau đó thì mới chạy đúng chế độ tải file.
+                link.style.display = 'none';
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
             } catch (err) {
                 console.warn('Lỗi khi lưu ảnh thiệp:', err);
                 showToast('Lưu ảnh thất bại, thử lại nha!', 'error');
@@ -487,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     // 2. COUNTDOWN TIMER & MULTI-IMAGE DROP ZONE
     // =========================================================
-    const targetDate = new Date('August 6, 2026 11:00:00').getTime();
+    const targetDate = new Date('August 6, 2025 11:00:00').getTime();
 
     const updateTimer = () => {
         const now = new Date().getTime();
@@ -1114,9 +1122,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ---------------------------------------------------
-        // PANEL: VOICE -> thu âm trực tiếp qua mic HOẶC chọn file có sẵn
-        // ---------------------------------------------------
+        // 🎙️🎥 Chọn mimeType MediaRecorder mà trình duyệt THỰC SỰ hỗ trợ.
+        // Bug cũ: gọi `new MediaRecorder(stream)` không truyền mimeType, rồi
+        // gán cứng Blob là 'audio/webm'/'video/webm'. Trên Safari (iOS/macOS)
+        // trình duyệt không hỗ trợ webm, nó tự âm thầm dùng codec khác (thường
+        // là mp4/aac) nhưng Blob vẫn bị dán nhãn sai là webm -> thẻ <audio>/
+        // <video> preview không nhận diện được định dạng thật -> báo "Lỗi".
+        // Giờ luôn ưu tiên codec Safari hiểu được, và LUÔN lấy mimeType THẬT
+        // từ chính mediaRecorder.mimeType để gán cho Blob, không hardcode nữa.
+        function pickSupportedMimeType(candidates) {
+            if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return '';
+            return candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
+        }
+        function extFromMimeType(mimeType, fallbackExt) {
+            if (!mimeType) return fallbackExt;
+            if (mimeType.includes('mp4')) return 'mp4';
+            if (mimeType.includes('webm')) return 'webm';
+            if (mimeType.includes('ogg')) return 'ogg';
+            return fallbackExt;
+        }
+
+
         (function initVoicePanel() {
             const recordBtn = document.getElementById('voiceRecordBtn');
             const timerEl = document.getElementById('voiceTimer');
@@ -1149,12 +1175,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 chunks = [];
-                mediaRecorder = new MediaRecorder(stream);
+                const voiceMimeType = pickSupportedMimeType([
+                    'audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'
+                ]);
+                mediaRecorder = voiceMimeType ? new MediaRecorder(stream, { mimeType: voiceMimeType }) : new MediaRecorder(stream);
                 mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
                 mediaRecorder.onstop = () => {
                     clearInterval(timerInterval);
                     stream.getTracks().forEach(t => t.stop());
-                    recordedBlob = new Blob(chunks, { type: 'audio/webm' });
+                    // Luôn lấy mimeType THẬT mà trình duyệt vừa dùng để ghi âm
+                    // (mediaRecorder.mimeType), không hardcode 'audio/webm' nữa.
+                    const actualMimeType = mediaRecorder.mimeType || voiceMimeType || 'audio/webm';
+                    recordedBlob = new Blob(chunks, { type: actualMimeType });
+                    recordedBlob.__ext = extFromMimeType(actualMimeType, 'webm');
                     uploadedFile = null;
                     preview.src = URL.createObjectURL(recordedBlob);
                     preview.hidden = false;
@@ -1208,8 +1241,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendBtn.innerText = 'ĐANG GỬI...';
 
                 try {
-                    const filename = uploadedFile ? uploadedFile.name : `voice-${Date.now()}.webm`;
-                    const mimeType = uploadedFile ? (uploadedFile.type || 'audio/mpeg') : 'audio/webm';
+                    const recordedExt = recordedBlob ? (recordedBlob.__ext || 'webm') : 'webm';
+                    const filename = uploadedFile ? uploadedFile.name : `voice-${Date.now()}.${recordedExt}`;
+                    const mimeType = uploadedFile ? (uploadedFile.type || 'audio/mpeg') : (recordedBlob ? recordedBlob.type : 'audio/webm');
                     await uploadSingleFile(`[Voice] ${name}`, blobToSend, filename, mimeType);
 
                     showToast('Đã gửi voice thành công! Cảm ơn bạn nhiều 💙', 'success');
@@ -1272,7 +1306,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 livePreview.hidden = false;
 
                 chunks = [];
-                mediaRecorder = new MediaRecorder(stream);
+                const videoMimeType = pickSupportedMimeType([
+                    'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'
+                ]);
+                mediaRecorder = videoMimeType ? new MediaRecorder(stream, { mimeType: videoMimeType }) : new MediaRecorder(stream);
                 mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
                 mediaRecorder.onstop = () => {
                     clearInterval(timerInterval);
@@ -1280,7 +1317,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     livePreview.hidden = true;
                     livePreview.srcObject = null;
 
-                    recordedBlob = new Blob(chunks, { type: 'video/webm' });
+                    // Luôn lấy mimeType THẬT mà trình duyệt vừa dùng để quay
+                    // (mediaRecorder.mimeType), không hardcode 'video/webm' nữa.
+                    const actualMimeType = mediaRecorder.mimeType || videoMimeType || 'video/webm';
+                    recordedBlob = new Blob(chunks, { type: actualMimeType });
+                    recordedBlob.__ext = extFromMimeType(actualMimeType, 'webm');
                     uploadedFile = null;
                     playback.src = URL.createObjectURL(recordedBlob);
                     playback.hidden = false;
@@ -1335,8 +1376,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendBtn.innerText = 'ĐANG GỬI...';
 
                 try {
-                    const filename = uploadedFile ? uploadedFile.name : `video-${Date.now()}.webm`;
-                    const mimeType = uploadedFile ? (uploadedFile.type || 'video/mp4') : 'video/webm';
+                    const recordedExt = recordedBlob ? (recordedBlob.__ext || 'webm') : 'webm';
+                    const filename = uploadedFile ? uploadedFile.name : `video-${Date.now()}.${recordedExt}`;
+                    const mimeType = uploadedFile ? (uploadedFile.type || 'video/mp4') : (recordedBlob ? recordedBlob.type : 'video/webm');
                     await uploadSingleFile(`[Video] ${name}`, blobToSend, filename, mimeType);
 
                     showToast('Đã gửi video thành công! Cảm ơn bạn nhiều 💙', 'success');
