@@ -3,6 +3,15 @@
    round-trip nữa (chờ tải xong style.css mới bắt đầu tải font, thay vì tải
    song song ngay từ đầu như <link>). */
 
+/* 🚀 FIX ẢNH BỊ KÉO DÃN: các thẻ <img> có thuộc tính width/height (để chống
+   giật layout - CLS) nhưng CSS bên dưới chỉ set "width" theo từng class
+   (.hero-decor, .bento-decor...) mà không set "height". Nếu không có dòng
+   này, trình duyệt sẽ giữ nguyên height cố định theo thuộc tính HTML trong
+   khi width đã bị đổi theo CSS => ảnh bị bóp/kéo dãn sai tỉ lệ. "height:auto"
+   ở đây (specificity thấp) đảm bảo height LUÔN tự tính lại theo đúng tỉ lệ
+   gốc của ảnh mỗi khi có class nào đó set width riêng. */
+img { height: auto; }
+
 :root {
     --cream-bg: #EFECE3;
     --royal-blue: #5B7B9C;
