@@ -10,16 +10,33 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Bao Anh - Graduation Ceremony 2026</title>
+
+    <!-- Open Graph: để khi dán link vào Facebook/Zalo/Messenger... nó hiện
+         card có ảnh + tiêu đề + mô tả, thay vì chỉ hiện link trơn.
+         ⚠️ og:image và og:url PHẢI là link tuyệt đối (https://...) thì mấy
+         nền tảng mới đọc được ảnh - cần thay YOUR-DOMAIN-HERE bằng domain
+         GitHub Pages thật của bạn (vd: https://tenban.github.io/ten-repo/). -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Bao Anh - Graduation Ceremony 2026">
+    <meta property="og:description" content="Cùng ăn mừng ngày tốt nghiệp của Bảo Anh! Bấm vào để xem thiệp mời và RSVP nha 🎓">
+    <meta property="og:image" content="https://zune-lab.github.io/le-tot-nghiep/invite.jpg">
+    <meta property="og:url" content="https://zune-lab.github.io/le-tot-nghiep/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Bao Anh - Graduation Ceremony 2026">
+    <meta name="twitter:description" content="Cùng ăn mừng ngày tốt nghiệp của Bảo Anh! Bấm vào để xem thiệp mời và RSVP nha 🎓">
+    <meta name="twitter:image" content="https://zune-lab.github.io/le-tot-nghiep/invite.jpg">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@400;600;700&family=Special+Elite&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">  
     
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=9">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- mammoth.js: đọc trực tiếp file .docx (special-guest.docx) ngay trên trình duyệt -->
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+    <!-- html2canvas: chụp thiệp special guest thành ảnh PNG để khách lưu về máy -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -175,7 +192,7 @@
                 <ul class="timeline">
                     <li class="timeline-item">
                         <span class="timeline-dot" aria-hidden="true"></span>
-                        <span class="timeline-time">8:30 – 9:30</span>
+                        <span class="timeline-time">9:00 – 9:30</span>
                         <span class="timeline-label"> Đón tiếp gia đình</span>
                     </li>
                     <li class="timeline-item">
@@ -185,7 +202,7 @@
                     </li>
                     <li class="timeline-item">
                         <span class="timeline-dot" aria-hidden="true"></span>
-                        <span class="timeline-time">11:00 – 12:00</span>
+                        <span class="timeline-time">11:15 – 12:00</span>
                         <span class="timeline-label">Đón tiếp bạn bè 🎉</span>
                     </li>
                 </ul>
@@ -195,6 +212,7 @@
             <article class="bento-card box-note">
                 <img src="pic/stickers/denim-10.png" alt="Heart" class="bento-decor note-heart-sticker">
                 <img src="pic/stickers/denim-03.png" alt="Star" class="bento-decor note-star-sticker">
+                <img src="pic/phone-call.png" alt="Phone call sticker" class="bento-decor note-phone-sticker">
                 <div class="note-tape" aria-hidden="true"></div>
                 <p class="note-title">Note:</p>
                 <p class="note-line note-italic">Trai xinh gái đẹp nào mình đi xe thì GỬI XE tại cổng 06 Nguyễn Trãi, phường Chợ Quán, quận 5 nhen ❤ ✨</p>
@@ -238,6 +256,77 @@
                     </div>
                 </form>
             </article>
+
+            <!-- Box 6: Không đi được thì gửi lời chúc -->
+            <article class="bento-card box-cantcome">
+                <img src="pic/stickers/denim-04.png" alt="Bow" class="bento-decor cantcome-bow-sticker">
+                <img src="pic/stickers/denim-09.png" alt="Stars" class="bento-decor cantcome-stars-sticker">
+                <img src="pic/pc2.png" alt="Gọi cho tớ nha" class="bento-decor cantcome-pc-left">
+                <img src="pic/pc3.png" alt="Gọi cho tớ nha" class="bento-decor cantcome-pc-right">
+
+                <div class="cantcome-title">
+                    <h3 class="bubble-font">BẠN KHÔNG ĐI ĐƯỢC?</h3>
+                    <p>Vẫn muốn nghe/đọc lời chúc từ bạn nè 🥺💌</p>
+                </div>
+
+                <div class="cantcome-tabs" role="tablist">
+                    <button type="button" class="cantcome-tab active" data-tab="msg">📝 Tin nhắn</button>
+                    <button type="button" class="cantcome-tab" data-tab="voice">🎤 Voice</button>
+                    <button type="button" class="cantcome-tab" data-tab="video">🎥 Video</button>
+                </div>
+
+                <!-- Panel: Tin nhắn -->
+                <div class="cantcome-panel active" data-panel="msg">
+                    <div class="cantcome-row">
+                        <div class="form-group flex-2">
+                            <label for="cantcomeMsgName">YOUR NAME</label>
+                            <input type="text" id="cantcomeMsgName" placeholder="Who r u?">
+                        </div>
+                        <div class="form-group flex-3">
+                            <label for="cantcomeMsgText">MESSAGE</label>
+                            <textarea id="cantcomeMsgText" placeholder="Gửi lời chúc cho tớ nha..."></textarea>
+                        </div>
+                    </div>
+                    <button type="button" id="cantcomeMsgSendBtn" class="submit-btn bubble-font cantcome-submit">Gửi lời chúc 💌</button>
+                </div>
+
+                <!-- Panel: Voice -->
+                <div class="cantcome-panel" data-panel="voice" hidden>
+                    <div class="form-group flex-2">
+                        <label for="cantcomeVoiceName">YOUR NAME</label>
+                        <input type="text" id="cantcomeVoiceName" placeholder="Who r u?">
+                    </div>
+                    <div class="record-box">
+                        <button type="button" id="voiceRecordBtn" class="record-btn bubble-font">🎤 Bấm để thu âm</button>
+                        <span id="voiceTimer" class="record-timer" hidden>00:00</span>
+                        <audio id="voicePreview" controls hidden></audio>
+                    </div>
+                    <div class="record-divider"><span>hoặc</span></div>
+                    <label for="voiceUpload" class="upload-file-label">📁 Chọn file âm thanh có sẵn</label>
+                    <input type="file" id="voiceUpload" accept="audio/*" hidden>
+                    <span id="voiceFileName" class="record-filename"></span>
+                    <button type="button" id="voiceSendBtn" class="submit-btn bubble-font cantcome-submit" disabled>Gửi voice 🚀</button>
+                </div>
+
+                <!-- Panel: Video -->
+                <div class="cantcome-panel" data-panel="video" hidden>
+                    <div class="form-group flex-2">
+                        <label for="cantcomeVideoName">YOUR NAME</label>
+                        <input type="text" id="cantcomeVideoName" placeholder="Who r u?">
+                    </div>
+                    <div class="record-box">
+                        <video id="videoLivePreview" class="video-frame" muted playsinline autoplay hidden></video>
+                        <video id="videoPlayback" class="video-frame" controls hidden></video>
+                        <button type="button" id="videoRecordBtn" class="record-btn bubble-font">🎥 Bấm để quay video</button>
+                        <span id="videoTimer" class="record-timer" hidden>00:00</span>
+                    </div>
+                    <div class="record-divider"><span>hoặc</span></div>
+                    <label for="videoUpload" class="upload-file-label">📁 Chọn file video có sẵn</label>
+                    <input type="file" id="videoUpload" accept="video/*" hidden>
+                    <span id="videoFileName" class="record-filename"></span>
+                    <button type="button" id="videoSendBtn" class="submit-btn bubble-font cantcome-submit" disabled>Gửi video 🚀</button>
+                </div>
+            </article>
         </div>
     </main>
 
@@ -263,7 +352,10 @@
             <img src="pic/stickers/cat-note.png" alt="Mèo xác nhận" class="modal-icon">
             <h3 class="bubble-font">SPECIAL GUEST ✨</h3>
             <p id="special-guest-message"></p>
-            <button class="close-modal-btn" onclick="closeModal('special-guest-modal')">ĐÓNG</button>
+            <div class="special-guest-actions">
+                <button id="save-letter-btn" class="save-letter-btn" type="button">LƯU THƯ 📸</button>
+                <button class="close-modal-btn" onclick="closeModal('special-guest-modal')">ĐÓNG</button>
+            </div>
         </div>
     </div>
 
@@ -287,7 +379,7 @@
 
             <div id="super-special-guest-video-section" class="super-special-guest-video-wrap">
                 <video id="super-special-guest-video" class="super-special-guest-video" controls playsinline preload="metadata">
-                    <source src="video/y-trinh-super-special.mp4" type="video/mp4">
+                    <source src="video/for-you.mp4" type="video/mp4">
                     Trình duyệt của bạn không hỗ trợ video này.
                 </video>
             </div>

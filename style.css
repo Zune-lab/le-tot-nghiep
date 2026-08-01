@@ -398,7 +398,7 @@ body::before {
 .button-sticker { bottom: -35px; right: -15px; width: 45px; --tilt: -10deg; }
 .exclamation-sticker { top: -25px; left: 15px; width: 35px; --tilt: 12deg; }
 .star-sticker { top: -25px; left: -15px; width: 60px; --tilt: -25deg; }
-.notepad-sticker { bottom: -40px; right: -15px; width: 50px; --tilt: 15deg; }
+.notepad-sticker { bottom: -40px; right: -15px; width: 50px; --tilt: 15deg; z-index: 6; }
 .countdown-rocket { top: -22px; right: -12px; width: 55px; --tilt: 18deg; z-index: 5; }
 .rsvp-cat { bottom: -20px; left: -18px; width: 62px; --tilt: -8deg; z-index: 5; }
 
@@ -408,11 +408,12 @@ body::before {
 .box-agenda { grid-column: 1 / 4; display: flex; flex-direction: column; justify-content: center; z-index: 10 !important; }
 .box-note { grid-column: 1 / 4; z-index: 15 !important; }
 .box-rsvp {
-    grid-column: 1 / 4; background: #FFFDF5; z-index: 40 !important;
+    grid-column: 1 / 4; background: #FFFDF5; z-index: 46 !important;
     /* Chừa thêm khoảng trống phía trên bên phải cho bento-p3 "ló" lên mà
        không chạm vào tiêu đề RSVP ngay bên dưới. */
     padding-top: 55px;
 }
+.box-cantcome { grid-column: 1 / 4; z-index: 45 !important; }
 
 /* ==========================================================================
    GIẤY NOTE GỬI XE & LIÊN HỆ
@@ -434,6 +435,7 @@ body::before {
 }
 .note-heart-sticker { top: -22px; left: -10px; width: 50px; --tilt: -18deg; z-index: 5; }
 .note-star-sticker { bottom: -18px; right: -12px; width: 48px; --tilt: 20deg; z-index: 5; }
+.note-phone-sticker { bottom: 16px; left: 30px; width: 105px; --tilt: -12deg; z-index: 5; }
 
 .note-title {
     font-family: 'Patrick Hand', 'Caveat', cursive; font-weight: 700; font-size: 1.8rem;
@@ -594,8 +596,11 @@ body::before {
 }
 .form-group label { white-space: nowrap; }
 
-/* FIX LỖI SCROLLBAR, ĐỘ RỘNG 100% VÀ HIỆU ỨNG TEXTAREA */
-.street-form input, .street-form textarea { 
+/* FIX LỖI SCROLLBAR, ĐỘ RỘNG 100% VÀ HIỆU ỨNG TEXTAREA
+   (Áp dụng chung cho form RSVP .street-form VÀ box "Không đi được" .cantcome-panel,
+   để 2 input trông đồng bộ chứ không bị lệch tông thành ô input trơn mặc định) */
+.street-form input, .street-form textarea,
+.cantcome-panel input, .cantcome-panel textarea { 
     width: 100%; 
     box-sizing: border-box;
     background: rgba(255, 255, 255, 0.4); 
@@ -609,8 +614,8 @@ body::before {
     position: relative; 
     z-index: 100 !important; 
 }
-.street-form input { height: 48px; }
-.street-form textarea { 
+.street-form input, .cantcome-panel input { height: 48px; }
+.street-form textarea, .cantcome-panel textarea { 
     min-height: 48px; 
     height: 48px; 
     overflow-y: hidden; 
@@ -619,8 +624,11 @@ body::before {
     word-break: break-all; 
     overflow-wrap: break-word; 
 }
-.street-form input:hover, .street-form textarea:hover { background: rgba(91, 123, 156, 0.08); }
-.street-form input:focus, .street-form textarea:focus { outline: none; background: rgba(255, 255, 255, 0.8); border-bottom: 2px solid var(--charcoal-black); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.street-form input:hover, .street-form textarea:hover,
+.cantcome-panel input:hover, .cantcome-panel textarea:hover { background: rgba(91, 123, 156, 0.08); }
+.street-form input:focus, .street-form textarea:focus,
+.cantcome-panel input:focus, .cantcome-panel textarea:focus { outline: none; background: rgba(255, 255, 255, 0.8); border-bottom: 2px solid var(--charcoal-black); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
 
 .submit-btn { 
     background: var(--royal-blue); color: var(--white); border: var(--border-thick); padding: 0 10px; font-size: 1.4rem; border-radius: 8px; cursor: pointer; box-shadow: 4px 4px 0 var(--charcoal-black); height: 48px; width: 100%; transition: all 0.25s ease; margin-top: auto; white-space: nowrap;
@@ -629,6 +637,93 @@ body::before {
 .submit-btn:hover { background: #FDFBF7; color: var(--charcoal-black); transform: rotate(-1.5deg) translate(-3px, -3px); box-shadow: 7px 7px 0 var(--charcoal-black); }
 .submit-btn:active { transform: rotate(-1.5deg) translate(2px, 2px); box-shadow: 2px 2px 0 var(--charcoal-black); background: var(--royal-blue); color: var(--white); }
 .submit-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: rotate(-1.5deg); box-shadow: 4px 4px 0 var(--charcoal-black); }
+
+/* ==========================================================================
+   BOX: KHÔNG ĐI ĐƯỢC - GỬI TIN NHẮN / VOICE / VIDEO
+   ========================================================================== */
+.box-cantcome {
+    background: #FFFDF5;
+    border: 2px dashed rgba(44, 53, 57, 0.35) !important;
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.07);
+    text-align: center;
+    transform: rotate(0.6deg);
+    padding: 30px 30px 34px 30px;
+}
+.box-cantcome:hover { transform: rotate(0.6deg) translate(-4px, -4px); }
+
+.cantcome-bow-sticker { bottom: -14px; right: -12px; width: 48px; --tilt: 14deg; z-index: 5; }
+.cantcome-stars-sticker { bottom: -16px; left: -14px; width: 46px; --tilt: -16deg; z-index: 5; }
+.cantcome-pc-left { top: 190px; left: -44px; width: 100px; --tilt: -10deg; z-index: 4; }
+.cantcome-pc-right { top: 170px; right: -40px; width: 100px; --tilt: 9deg; z-index: 4; }
+
+.cantcome-title h3 { font-size: 2rem; color: var(--charcoal-black); margin-bottom: 2px; }
+.cantcome-title p { font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.1rem; color: var(--royal-blue); margin-bottom: 18px; }
+
+.cantcome-tabs { display: flex; justify-content: center; gap: 14px; margin-bottom: 26px; flex-wrap: wrap; }
+.cantcome-tab {
+    font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.2rem; font-weight: 700;
+    background: #FFFDF5; color: var(--charcoal-black);
+    border: 2px dashed rgba(44, 53, 57, 0.45); border-radius: 10px; padding: 8px 20px;
+    cursor: pointer; box-shadow: 3px 4px 0 rgba(0,0,0,0.09);
+    transition: all 0.2s ease;
+}
+.cantcome-tab:nth-child(1) { transform: rotate(-2deg); }
+.cantcome-tab:nth-child(2) { transform: rotate(1.5deg); }
+.cantcome-tab:nth-child(3) { transform: rotate(-1.5deg); }
+.cantcome-tab:hover { transform: translateY(-3px) rotate(0deg) !important; box-shadow: 4px 6px 0 rgba(0,0,0,0.14); }
+.cantcome-tab.active {
+    background: var(--royal-blue); color: var(--white); border-style: solid; border-color: var(--charcoal-black);
+    box-shadow: 3px 4px 0 var(--charcoal-black); transform: rotate(0deg) !important;
+}
+
+.cantcome-panel {
+    display: flex; flex-direction: column; align-items: center; gap: 16px; max-width: 520px; margin: 0 auto;
+    background: #FFFDF5; border: 2px dashed rgba(44, 53, 57, 0.3); border-radius: 12px;
+    padding: 24px 22px 22px 22px; position: relative;
+}
+.cantcome-panel::before {
+    content: '';
+    position: absolute; top: -13px; left: 22px; transform: rotate(-9deg);
+    width: 52px; height: 22px;
+    background: repeating-linear-gradient(45deg, rgba(91, 123, 156, 0.55) 0 6px, rgba(91, 123, 156, 0.32) 6px 12px);
+    border: 1px solid rgba(44, 53, 57, 0.15);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.08);
+    z-index: 2;
+}
+.cantcome-panel[hidden] { display: none !important; }
+
+.cantcome-row { display: flex; gap: 15px; width: 100%; align-items: stretch; text-align: left; }
+.cantcome-submit { max-width: 260px; }
+
+.record-box { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.record-btn {
+    font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.2rem; font-weight: 700;
+    background: var(--hot-pink); color: var(--white); border: var(--border-thick); border-radius: 10px;
+    padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 var(--charcoal-black);
+    transition: all 0.2s ease;
+}
+.record-btn:hover { transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--charcoal-black); }
+.record-btn.recording { background: var(--alert-red); animation: recordPulse 1s ease-in-out infinite; }
+@keyframes recordPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+.record-timer { font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 1.1rem; color: var(--alert-red); }
+
+#voicePreview { width: 100%; }
+.video-frame {
+    width: 100%; max-width: 320px; aspect-ratio: 4/3; object-fit: cover;
+    border: 3px solid var(--charcoal-black); border-radius: 10px; background: var(--charcoal-black);
+}
+
+.record-divider { display: flex; align-items: center; width: 100%; gap: 10px; color: var(--royal-blue); font-family: 'Patrick Hand', cursive; font-size: 0.95rem; opacity: 0.8; }
+.record-divider::before, .record-divider::after { content: ''; flex: 1; border-top: 2px dashed rgba(91, 123, 156, 0.4); }
+
+.upload-file-label {
+    display: inline-block; font-family: 'Patrick Hand', 'Caveat', cursive; font-size: 1.05rem;
+    background: rgba(255,255,255,0.5); border: 2px dashed var(--royal-blue); border-radius: 8px;
+    padding: 9px 18px; cursor: pointer; transition: all 0.2s ease;
+}
+.upload-file-label:hover { background: rgba(165, 192, 214, 0.3); }
+.record-filename { font-family: 'Patrick Hand', cursive; font-size: 0.9rem; font-style: italic; color: var(--charcoal-black); opacity: 0.75; }
 
 /* FOOTER & MODALS */
 .street-footer {
@@ -663,7 +758,7 @@ body::before {
 }
 .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 .modal-content {
-    background: #FFFDF5; border: 3px solid var(--charcoal-black); padding: 46px 34px 34px; max-width: 420px; width: 90%; text-align: center;
+    background: #FFFDF5; border: 3px solid var(--charcoal-black); padding: 28px 34px 34px; max-width: 420px; width: 90%; text-align: center;
     border-radius: 18px; position: relative; overflow: visible;
     box-shadow: 8px 8px 0 var(--royal-blue), 0 0 0 6px rgba(91, 123, 156, 0.15);
     transform: scale(0.6) rotate(-4deg); transition: transform 0.1s;
@@ -680,10 +775,10 @@ body::before {
     border: 1px solid rgba(44, 53, 57, 0.15); box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.08); z-index: 2;
 }
 .modal-corner-sticker { position: absolute; z-index: 3; pointer-events: none; }
-.modal-star { top: -20px; left: -18px; width: 46px; transform: rotate(-15deg); }
+.modal-star { top: -32px; left: -18px; width: 46px; transform: rotate(-15deg); }
 .modal-heart { bottom: -16px; right: -14px; width: 44px; transform: rotate(12deg); }
 .modal-icon {
-    width: 92px; display: block; margin: 0 auto 8px; animation: modalIconBounce 1.6s ease-in-out infinite;
+    width: 92px; display: block; margin: 0 auto 4px; animation: modalIconBounce 1.6s ease-in-out infinite;
     border: none !important; box-shadow: none !important;
     filter:
         drop-shadow(2px 0px 0px #ffffff)
@@ -707,6 +802,9 @@ body::before {
 .special-guest-content {
     background: linear-gradient(160deg, #FFFDF5 0%, #FFF6DA 100%);
     box-shadow: 8px 8px 0 #E3A62F, 0 0 0 6px rgba(227, 166, 47, 0.2);
+    /* Nội dung thư khá dài, nới rộng hơn khung modal mặc định (420px) một chút
+       để câu chữ đỡ bị xuống dòng dồn dập, đọc thoáng hơn. */
+    max-width: 480px;
 }
 .special-guest-content h3 {
     background: linear-gradient(90deg, #E3A62F, #C97B84, #5B7B9C, #E3A62F);
@@ -715,9 +813,59 @@ body::before {
     animation: specialGuestShine 3s linear infinite;
 }
 @keyframes specialGuestShine { to { background-position: 300% center; } }
-.special-guest-content #special-guest-message { white-space: pre-line; }
-.special-guest-content .close-modal-btn { background: #E3A62F; }
+.special-guest-content #special-guest-message {
+    /* pre-wrap thay vì pre-line: vẫn tự xuống dòng khi tràn khung như bình
+       thường, NHƯNG giữ nguyên các dấu cách thụt lề đầu đoạn trong file Word
+       gốc (pre-line sẽ gộp các dấu cách liên tiếp lại thành 1, làm mất thụt lề). */
+    white-space: pre-wrap;
+    max-height: 46vh;
+    overflow-y: auto;
+    padding: 4px 10px 4px 2px;
+    margin: 0 -8px;
+    /* Thư dài nhiều đoạn -> canh trái để dễ đọc, thay vì center kế thừa từ
+       .modal-content (center chỉ hợp với tiêu đề/nút, không hợp đoạn văn dài). */
+    text-align: left;
+    /* để lộ 1 chút thanh cuộn mảnh, không quá "web app" */
+    scrollbar-width: thin;
+    scrollbar-color: #E3A62F transparent;
+    /* Chặn scroll "tràn" ra trang nền khi cuộn hết nội dung thư (scroll chaining) */
+    overscroll-behavior: contain;
+    /* Fade mờ ở mép trên/dưới để gợi ý còn nội dung phía trên/dưới khi đang
+       cuộn giữa chừng - tránh cảm giác thư "hết rồi" trong khi còn dài.
+       Mặc định (lúc mới mở, đang ở đầu thư) chỉ fade mép DƯỚI - fade mép trên
+       sẽ do JS bật/tắt tuỳ vị trí cuộn thực tế (xem updateSpecialGuestFade
+       trong script.js), tránh cắt mờ chữ dòng đầu tiên khi chưa cuộn gì cả. */
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 20px), transparent 100%);
+    mask-image: linear-gradient(to bottom, black calc(100% - 20px), transparent 100%);
+}
+.special-guest-content #special-guest-message::-webkit-scrollbar { width: 6px; }
+.special-guest-content #special-guest-message::-webkit-scrollbar-thumb { background: #E3A62F; border-radius: 10px; }
+.special-guest-content #special-guest-message::-webkit-scrollbar-track { background: transparent; }
+.special-guest-content .close-modal-btn { background: #E3A62F; margin-top: 0; }
 .special-guest-content .close-modal-btn:active { background: #E3A62F; }
+
+.special-guest-actions { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+.save-letter-btn {
+    background: var(--white); color: var(--charcoal-black); border: 3px solid var(--charcoal-black); padding: 10px 22px; border-radius: 10px; font-weight: 900; cursor: pointer; box-shadow: 4px 4px 0 #E3A62F; transition: all 0.2s ease; font-family: 'Space Grotesk', sans-serif;
+}
+.save-letter-btn:hover { background: #FFF6DA; transform: translate(-3px, -3px); box-shadow: 7px 7px 0 #E3A62F; }
+.save-letter-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #E3A62F; }
+.save-letter-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: 4px 4px 0 #E3A62F; }
+
+/* Dùng lúc chụp ảnh thiệp (html2canvas): animation + inline transform không thể
+   bị JS override bằng cách set style.transform vì animation "forwards" có độ ưu
+   tiên cao hơn inline style. Class này !important để tắt hẳn cả 2, giữ thiệp thẳng
+   khi chụp, xong JS gỡ class ra là thiệp nghiêng lại bình thường. */
+.letter-capture-flat { animation: none !important; transform: none !important; }
+.letter-capture-flat #special-guest-message {
+    max-height: none !important;
+    overflow: visible !important;
+    /* Fade mờ 2 đầu chỉ có ý nghĩa khi khung đang bị giới hạn chiều cao và cuộn
+       được; lúc chụp full thư (không cuộn) phải tắt hẳn, không thì dòng đầu/cuối
+       trong ảnh lưu về sẽ bị mờ đi oan uổng. */
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+}
 
 /* ===== SUPER EASTER EGG: Super Special Guest Modal (video riêng, chỉ dành cho Ý Trinh) ===== */
 .super-special-guest-content {
@@ -829,6 +977,7 @@ body::before {
     .note-title { font-size: 1.5rem; }
     .note-heart-sticker { width: 34px; top: -16px; left: -8px; }
     .note-star-sticker { width: 32px; bottom: -14px; right: -8px; }
+    .note-phone-sticker { width: 50px; bottom: 15px; left: 40px; }
 
     /* Sao góc trên + trái tim cạnh ảnh chính - thu nhỏ và kéo vào để không bị cắt mất bởi overflow:hidden */
     .name-stars-left { width: 18px; top: 55px; left: -22px; right: auto; z-index: 5; --tilt: -28deg; }
@@ -923,7 +1072,17 @@ body::before {
     
     /* Grid bento box dọc */
     .bento-grid { grid-template-columns: 1fr; }
-    .box-countdown, .box-contact, .box-agenda, .box-note, .box-rsvp { grid-column: 1 / -1; }
+    .box-countdown, .box-contact, .box-agenda, .box-note, .box-rsvp, .box-cantcome { grid-column: 1 / -1; }
+
+    .box-cantcome { padding: 26px 18px 30px 18px; }
+    .cantcome-bow-sticker { width: 32px; bottom: -10px; right: -8px; }
+    .cantcome-stars-sticker { width: 30px; bottom: -12px; left: -8px; }
+    .cantcome-pc-left, .cantcome-pc-right { display: none !important; }
+    .cantcome-title h3 { font-size: 1.6rem; }
+    .cantcome-tabs { gap: 8px; }
+    .cantcome-tab { font-size: 1rem; padding: 6px 14px; }
+    .cantcome-row { flex-direction: column; }
+    .video-frame { max-width: 100%; }
     
     .street-form { flex-direction: column; align-items: stretch; }
     .form-group { width: 100%; }

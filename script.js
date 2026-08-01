@@ -140,19 +140,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cells = row.querySelectorAll('td');
                 if (cells.length < 2) return;
 
-                const rawName = cells[0].textContent.trim();
-                const rawMsg = cells[1].textContent.trim();
-                if (!rawName) return;
+                // ⚠️ Ô tên có thể có NHIỀU DÒNG = nhiều biệt danh của CÙNG 1 người
+                // (vd: "Cẩm Tiên" / "Cẩm Teen" / "Cỏm Tin"), mỗi dòng là 1 <p> riêng
+                // trong Word. KHÔNG được lấy cells[0].textContent trực tiếp vì nó nối
+                // dính liền các <p> lại với nhau (không có khoảng trắng/xuống dòng),
+                // ví dụ sẽ ra "Cẩm TiênCẩm TeenCỏm Tin" khiến không khớp được tên nào
+                // khách thật sự nhập. Nên phải tách theo từng thẻ <p> con trước.
+                const nameParas = cells[0].querySelectorAll('p');
+                const nameLines = [];
+                if (nameParas.length > 0) {
+                    nameParas.forEach(p => {
+                        const t = p.textContent.trim();
+                        if (t) nameLines.push(t);
+                    });
+                } else {
+                    // Phòng hờ ô tên không có thẻ <p> con (chỉ 1 dòng, không xuống dòng).
+                    const t = cells[0].textContent.trim();
+                    if (t) nameLines.push(t);
+                }
+                if (nameLines.length === 0) return;
+
+                // ⚠️ TƯƠNG TỰ Ô TÊN: ô lời chúc trong Word thường có NHIỀU ĐOẠN VĂN
+                // (mỗi đoạn là 1 <p> riêng, có đoạn còn thụt lề bằng vài dấu cách ở
+                // đầu dòng). Nếu lấy cells[1].textContent trực tiếp thì mọi đoạn sẽ bị
+                // NỐI DÍNH LIỀN vào nhau (không có xuống dòng), khiến thư hiện lên
+                // thành 1 khối chữ chạy chung một mạch, sai hẳn cách trình bày trong
+                // Word. Nên phải tách theo từng thẻ <p> con rồi nối lại bằng dấu xuống
+                // dòng để giữ đúng cách ngắt đoạn + thụt lề gốc.
+                const msgParas = cells[1].querySelectorAll('p');
+                let rawMsg;
+                if (msgParas.length > 0) {
+                    rawMsg = Array.from(msgParas)
+                        .map(p => p.textContent.replace(/\s+$/, '')) // chỉ bỏ khoảng trắng thừa CUỐI đoạn, giữ thụt lề ĐẦU đoạn
+                        .join('\n\n') // nối các đoạn bằng dòng trắng, đúng như cách các đoạn được ngăn cách trong file Word gốc
+                        .trim();
+                } else {
+                    rawMsg = cells[1].textContent.trim();
+                }
+                const primaryName = nameLines[0]; // tên chính để hiển thị / đặt tên file ảnh
 
                 // Ý Trinh (super special guest) không cần lời chúc chữ vì bạn ấy có video
                 // riêng, nên không bắt buộc phải có message như các special guest khác.
-                const isSuperSpecial = normalizeGuestName(rawName) === normalizeGuestName('Ý Trinh');
+                const isSuperSpecial = nameLines.some(n => normalizeGuestName(n) === normalizeGuestName('Ý Trinh'));
                 if (!isSuperSpecial) {
                     if (!rawMsg) return;
                     if (rawMsg.startsWith('(Điền lời chúc')) return; // ô placeholder chưa điền
                 }
 
-                specialGuestMap.set(normalizeGuestName(rawName), { name: rawName, message: rawMsg });
+                // Đăng ký TẤT CẢ biệt danh trong ô, mỗi biệt danh trỏ về cùng 1 guest
+                // (tên hiển thị dùng primaryName, không phải biệt danh khách gõ vào).
+                nameLines.forEach(alias => {
+                    specialGuestMap.set(normalizeGuestName(alias), { name: primaryName, message: rawMsg });
+                });
             });
         } catch (err) {
             console.warn('Không đọc được special-guest.docx, easter egg sẽ tắt:', err);
@@ -169,13 +208,121 @@ document.addEventListener('DOMContentLoaded', () => {
         return specialGuestMap.get(normalizeGuestName(nameList[0])) || null;
     }
 
-    function showSpecialGuestModal(guest) {
+    let currentSpecialGuestName = '';
+
+    // 🌫️ Fade mờ mép trên/dưới của thư special guest theo ĐÚNG vị trí cuộn
+    // thực tế: đang ở đầu thư -> không fade trên (tránh cắt mờ dòng đầu),
+    // đang ở cuối thư -> không fade dưới, ở giữa thì fade cả 2. Trước đây
+    // mask cố định 2 đầu nên dòng đầu tiên bị mờ oan dù chưa cuộn gì cả.
+    function updateSpecialGuestFade() {
+        const el = document.getElementById('special-guest-message');
+        if (!el) return;
+        const atTop = el.scrollTop <= 1;
+        const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 1;
+        let mask;
+        if (atTop && atBottom) {
+            mask = 'none';
+        } else if (atTop) {
+            mask = 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)';
+        } else if (atBottom) {
+            mask = 'linear-gradient(to bottom, transparent 0, black 20px, black 100%)';
+        } else {
+            mask = 'linear-gradient(to bottom, transparent 0, black 20px, black calc(100% - 20px), transparent 100%)';
+        }
+        el.style.maskImage = mask;
+        el.style.webkitMaskImage = mask;
+    }
+
+    function showSpecialGuestModal(guest, lock = true) {
         const modal = document.getElementById('special-guest-modal');
         const msgEl = document.getElementById('special-guest-message');
         if (!modal || !msgEl) return false;
         msgEl.textContent = guest.message;
+        msgEl.scrollTop = 0;
+        currentSpecialGuestName = guest.name || '';
         modal.classList.add('active');
+        // 🚀 lock=false: cho phép chỗ gọi khác (VD: sau khi RSVP) tự chủ động
+        // khóa scroll SAU KHI hiệu ứng cuộn lên đầu trang chạy xong, thay vì
+        // khóa cứng ngay lúc modal vừa hiện (sẽ làm gãy hiệu ứng cuộn).
+        if (lock) lockBodyScroll();
+        // Đợi khung hình kế tiếp để scrollHeight/clientHeight đã tính đúng
+        // sau khi gán nội dung + modal hiện ra, rồi mới tính fade ban đầu.
+        requestAnimationFrame(updateSpecialGuestFade);
         return true;
+    }
+
+    (function bindSpecialGuestFadeScroll() {
+        const el = document.getElementById('special-guest-message');
+        if (!el) return;
+        el.addEventListener('scroll', updateSpecialGuestFade);
+        window.addEventListener('resize', updateSpecialGuestFade);
+    })();
+
+    // 📸 LƯU THIỆP SPECIAL GUEST THÀNH ẢNH: chụp lại phần thiệp (không chụp
+    // nút bấm) bằng html2canvas rồi tự động tải PNG về máy khách.
+    const saveLetterBtn = document.getElementById('save-letter-btn');
+    if (saveLetterBtn) {
+        saveLetterBtn.addEventListener('click', async () => {
+            const letterEl = document.querySelector('#special-guest-modal .special-guest-content');
+            if (!letterEl) return;
+
+            if (typeof html2canvas === 'undefined') {
+                showToast('Chưa tải được thư viện lưu ảnh, thử lại sau nha!', 'error');
+                return;
+            }
+
+            const originalLabel = saveLetterBtn.textContent;
+            saveLetterBtn.disabled = true;
+            saveLetterBtn.textContent = 'ĐANG LƯU...';
+
+            // Ẩn HẲN khu vực nút bấm (không chỉ bỏ vẽ) để khoảng trống của nó
+            // biến mất luôn, chứ không để lại 1 khoảng trắng ở đáy ảnh.
+            const actionsEl = letterEl.querySelector('.special-guest-actions');
+            const prevDisplay = actionsEl ? actionsEl.style.display : '';
+            if (actionsEl) actionsEl.style.display = 'none';
+
+            // Thiệp đang bị nghiêng nhẹ nhờ CSS animation "modalPopIn" (fill-mode:
+            // forwards). Animation có độ ưu tiên cao hơn inline style, nên set thẳng
+            // element.style.transform = 'none' KHÔNG ăn thua - phải tắt bằng 1 class
+            // !important (tắt cả animation lẫn transform) thì mới hết nghiêng lúc chụp.
+            letterEl.classList.add('letter-capture-flat');
+            letterEl.offsetHeight; // ép reflow để đo lại kích thước cho đúng
+
+            // Chụp rộng ra một chút quanh thiệp thay vì sát mép, cho ảnh có "thở".
+            const CAPTURE_PADDING = 28; // px, theo tỉ lệ scale bên dưới
+
+            try {
+                const canvas = await html2canvas(letterEl, {
+                    backgroundColor: '#FFFDF5',
+                    scale: 2,
+                    useCORS: true
+                });
+
+                // Ghép ảnh đã chụp vào giữa 1 canvas to hơn, chừa viền nền xung quanh.
+                const pad = CAPTURE_PADDING * 2; // nhân theo scale:2 ở trên
+                const paddedCanvas = document.createElement('canvas');
+                paddedCanvas.width = canvas.width + pad * 2;
+                paddedCanvas.height = canvas.height + pad * 2;
+                const ctx = paddedCanvas.getContext('2d');
+                ctx.fillStyle = '#FFFDF5';
+                ctx.fillRect(0, 0, paddedCanvas.width, paddedCanvas.height);
+                ctx.drawImage(canvas, pad, pad);
+
+                const nameSlug = normalizeGuestName(currentSpecialGuestName).replace(/\s+/g, '-') || 'special-guest';
+                const link = document.createElement('a');
+                link.download = `thu-${nameSlug}.png`;
+                link.href = paddedCanvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.warn('Lỗi khi lưu ảnh thiệp:', err);
+                showToast('Lưu ảnh thất bại, thử lại nha!', 'error');
+            } finally {
+                letterEl.classList.remove('letter-capture-flat');
+                if (actionsEl) actionsEl.style.display = prevDisplay;
+                saveLetterBtn.disabled = false;
+                saveLetterBtn.textContent = originalLabel;
+            }
+        });
     }
 
     // 🌟 SUPER SPECIAL GUEST: riêng cho "Ý Trinh" - thay vì thiệp chữ, hiện video.
@@ -229,10 +376,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function showSuperSpecialGuestModal() {
+    function showSuperSpecialGuestModal(lock = true) {
         const modal = document.getElementById('super-special-guest-modal');
         if (!modal) return false;
         modal.classList.add('active');
+        if (lock) lockBodyScroll();
 
         if (superSpecialGuestUnlocked) {
             revealSuperSpecialGuestVideo();
@@ -289,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     // 2. COUNTDOWN TIMER & MULTI-IMAGE DROP ZONE
     // =========================================================
-    const targetDate = new Date('August 6, 2025 11:00:00').getTime();
+    const targetDate = new Date('August 6, 2026 11:00:00').getTime();
 
     const updateTimer = () => {
         const now = new Date().getTime();
@@ -705,10 +853,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderInviteName(allNamesStr);
 
                     const specialGuest = findSpecialGuest(nameList);
+
+                    // 🚀 FIX (theo yêu cầu): hiện MODAL trước, rồi MỚI cuộn lên đầu trang.
+                    // Trước đây lockBodyScroll() chạy ngay khi mở modal (position:fixed
+                    // trên <body>) nên nếu khóa scroll trước, trang không còn gì để cuộn
+                    // nữa -> cuộn phía sau vô nghĩa. Giờ mở modal KHÔNG khóa scroll ngay
+                    // (truyền lock=false), để trang vẫn cuộn được lên đầu, rồi mới khóa
+                    // scroll SAU KHI cuộn chạy xong hẳn (dùng 'scrollend', có fallback
+                    // setTimeout cho trình duyệt cũ / trường hợp trang đã sẵn ở đầu
+                    // trang nên không có sự kiện scrollend nào bắn ra).
                     const specialModalShown = specialGuest
                         ? (isSuperSpecialGuest(specialGuest)
-                            ? showSuperSpecialGuestModal()
-                            : showSpecialGuestModal(specialGuest))
+                            ? showSuperSpecialGuestModal(false)
+                            : showSpecialGuestModal(specialGuest, false))
                         : false;
 
                     if (specialModalShown) {
@@ -717,11 +874,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Dùng đúng nội dung mặc định có sẵn trong index.html
                         // ("CHỐT KÈO RỒI NHA! 🎓" / "Hẹn gặp bạn iu vào ngày 6.8 tại SGU nha 💙")
                         // cho MỌI khách thường, không ghi đè bằng JS nữa.
-                        successModal.classList.add('active'); 
+                        successModal.classList.add('active');
                     } else {
                         console.warn('Không tìm thấy #success-modal trong index.html.');
                     }
-                    
+
+                    let scrollSettled = false;
+                    const lockOnce = () => {
+                        if (scrollSettled) return;
+                        scrollSettled = true;
+                        lockBodyScroll();
+                    };
+
+                    // 🔝 Modal đã hiện, giờ mới cuộn về đầu trang để khách thấy thiệp
+                    // mời đã có tên mình.
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    if ('onscrollend' in window) {
+                        window.addEventListener('scrollend', lockOnce, { once: true });
+                        // Phòng trường hợp trang đã sẵn ở đầu trang (không có sự kiện
+                        // scrollend nào bắn ra) hoặc trình duyệt lag.
+                        setTimeout(lockOnce, 700);
+                    } else {
+                        // Trình duyệt cũ không hỗ trợ 'scrollend' -> canh theo thời lượng
+                        // cuộn mượt mặc định của trình duyệt.
+                        setTimeout(lockOnce, 600);
+                    }
+
                     form.reset(); 
                     guestNamesInput.placeholder = 'Who r u?';
                 }
@@ -766,7 +945,399 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Áp dụng y chang hiệu ứng auto-expand cho ô MESSAGE bên box "Không đi được"
+    const textareaCantcomeMsg = document.getElementById('cantcomeMsgText');
+    if (textareaCantcomeMsg) {
+        textareaCantcomeMsg.addEventListener('input', function() {
+            this.style.height = '48px';
+            const newHeight = this.scrollHeight;
+            if (newHeight > 150) {
+                this.style.height = '150px';
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.height = newHeight + 'px';
+                this.style.overflowY = 'hidden';
+            }
+        });
+        textareaCantcomeMsg.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.style.height = '';
+                this.style.overflowY = '';
+            }
+        });
+    }
+
+    // =========================================================
+    // 5. KHÔNG ĐI ĐƯỢC? GỬI TIN NHẮN / VOICE / VIDEO
+    // =========================================================
+    (function initCantComeBox() {
+        const box = document.querySelector('.box-cantcome');
+        if (!box) return;
+
+        // --- Chuyển tab ---
+        const tabs = box.querySelectorAll('.cantcome-tab');
+        const panels = box.querySelectorAll('.cantcome-panel');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const target = tab.dataset.tab;
+                panels.forEach(p => { p.hidden = p.dataset.panel !== target; });
+            });
+        });
+
+        // --- Helper: base64 hoá 1 file/blob ---
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // --- Helper: gửi 1 file lên Google Drive (dùng CHUNG endpoint với photo drop) ---
+        async function uploadSingleFile(guestName, blob, filename, mimeType) {
+            if (!GOOGLE_DRIVE_UPLOAD_URL || GOOGLE_DRIVE_UPLOAD_URL.includes('DÁN_WEB_APP_URL')) {
+                throw new Error('Chưa cấu hình nơi lưu file (Google Drive). Xem hướng dẫn trong file google-drive-upload.gs nhé!');
+            }
+            const data = await blobToBase64(blob);
+            const res = await fetch(GOOGLE_DRIVE_UPLOAD_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ guestName, files: [{ filename, mimeType, data }] })
+            });
+            const result = await res.json();
+            if (result.status !== 'success') throw new Error('Upload thất bại');
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = Math.floor(sec % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // ---------------------------------------------------
+        // PANEL: TIN NHẮN -> lưu vào Supabase (bảng rsvps CÓ SẴN),
+        // dùng guest_count: 0 để đánh dấu "không tham dự" mà vẫn có
+        // lời nhắn - khỏi phải tạo bảng mới trên Supabase.
+        // ---------------------------------------------------
+        const msgSendBtn = document.getElementById('cantcomeMsgSendBtn');
+        if (msgSendBtn) {
+            msgSendBtn.addEventListener('click', async () => {
+                const nameInput = document.getElementById('cantcomeMsgName');
+                const msgInput = document.getElementById('cantcomeMsgText');
+                const name = nameInput.value.trim();
+                const msg = msgInput.value.trim();
+
+                if (!name || name.length < 2) { showToast('Nhập tên hợp lệ nha (ít nhất 2 ký tự)!', 'error'); return; }
+                if (!msg) { showToast('Viết vài dòng lời chúc đi nè!', 'error'); return; }
+
+                const originalText = msgSendBtn.innerText;
+                msgSendBtn.disabled = true;
+                msgSendBtn.innerText = 'ĐANG GỬI...';
+
+                try {
+                    const { error } = await supabase
+                        .from('rsvps')
+                        .insert([{ guest_count: 0, guest_names: name, message: msg }]);
+
+                    if (error) {
+                        console.error('Supabase Error:', error);
+                        showToast('Lỗi khi lưu lời nhắn. Thử lại nha!', 'error');
+                    } else {
+                        showToast('Đã gửi lời chúc! Cảm ơn bạn nhiều 💙', 'success');
+                        nameInput.value = '';
+                        msgInput.value = '';
+                        msgInput.style.height = '';
+                        msgInput.style.overflowY = '';
+                    }
+                } catch (err) {
+                    showToast('Mất mạng rồi, check WiFi lại nhé!', 'error');
+                } finally {
+                    msgSendBtn.disabled = false;
+                    msgSendBtn.innerText = originalText;
+                }
+            });
+        }
+
+        // ---------------------------------------------------
+        // PANEL: VOICE -> thu âm trực tiếp qua mic HOẶC chọn file có sẵn
+        // ---------------------------------------------------
+        (function initVoicePanel() {
+            const recordBtn = document.getElementById('voiceRecordBtn');
+            const timerEl = document.getElementById('voiceTimer');
+            const preview = document.getElementById('voicePreview');
+            const uploadInput = document.getElementById('voiceUpload');
+            const fileNameEl = document.getElementById('voiceFileName');
+            const sendBtn = document.getElementById('voiceSendBtn');
+            const nameInput = document.getElementById('cantcomeVoiceName');
+            if (!recordBtn || !sendBtn) return;
+
+            let mediaRecorder = null, chunks = [], recordedBlob = null, uploadedFile = null;
+            let stream = null, timerInterval = null, seconds = 0;
+            const MAX_SECONDS = 120;
+
+            recordBtn.addEventListener('click', async () => {
+                if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); return; }
+
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (err) {
+                    console.error(err);
+                    if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+                        showToast('Bạn đã từ chối quyền mic nên trình duyệt sẽ không tự hỏi lại nữa. Vào phần cài đặt của trình duyệt (bấm biểu tượng 🔒/ⓘ cạnh thanh địa chỉ) > Quyền của trang này > bật lại Micro, rồi tải lại trang thử nha! Không thì dùng nút "Chọn file âm thanh có sẵn" bên dưới cũng được.', 'error');
+                    } else if (err.name === 'NotFoundError') {
+                        showToast('Không tìm thấy mic trên thiết bị này. Dùng nút "Chọn file âm thanh có sẵn" bên dưới nha!', 'error');
+                    } else {
+                        showToast('Không truy cập được mic. Kiểm tra quyền trình duyệt nha!', 'error');
+                    }
+                    return;
+                }
+
+                chunks = [];
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    clearInterval(timerInterval);
+                    stream.getTracks().forEach(t => t.stop());
+                    recordedBlob = new Blob(chunks, { type: 'audio/webm' });
+                    uploadedFile = null;
+                    preview.src = URL.createObjectURL(recordedBlob);
+                    preview.hidden = false;
+                    fileNameEl.innerText = '';
+                    uploadInput.value = '';
+                    sendBtn.disabled = false;
+                    recordBtn.classList.remove('recording');
+                    recordBtn.innerText = '🎤 Thu lại';
+                };
+
+                mediaRecorder.start();
+                recordBtn.classList.add('recording');
+                recordBtn.innerText = '⏹ Dừng thu';
+                timerEl.hidden = false;
+                seconds = 0;
+                timerEl.innerText = '00:00';
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    timerEl.innerText = formatTime(seconds);
+                    if (seconds >= MAX_SECONDS) mediaRecorder.stop();
+                }, 1000);
+            });
+
+            uploadInput.addEventListener('change', () => {
+                const file = uploadInput.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('audio/')) {
+                    showToast('File này không phải audio nha (lỡ chọn nhầm ảnh/video hả?). Chọn lại file âm thanh giúp mình!', 'error');
+                    uploadInput.value = '';
+                    return;
+                }
+                if (file.size > 20 * 1024 * 1024) {
+                    showToast('File nặng quá (trên 20MB). Chọn file nhẹ hơn xíu nha!', 'error');
+                    uploadInput.value = '';
+                    return;
+                }
+                uploadedFile = file;
+                recordedBlob = null;
+                fileNameEl.innerText = `Đã chọn: ${file.name}`;
+                preview.hidden = true;
+                sendBtn.disabled = false;
+            });
+
+            sendBtn.addEventListener('click', async () => {
+                const name = (nameInput.value.trim()) || (typeof getSavedGuestName === 'function' ? getSavedGuestName() : 'Ẩn danh');
+                const blobToSend = recordedBlob || uploadedFile;
+                if (!blobToSend) return;
+
+                const originalText = sendBtn.innerText;
+                sendBtn.disabled = true;
+                sendBtn.innerText = 'ĐANG GỬI...';
+
+                try {
+                    const filename = uploadedFile ? uploadedFile.name : `voice-${Date.now()}.webm`;
+                    const mimeType = uploadedFile ? (uploadedFile.type || 'audio/mpeg') : 'audio/webm';
+                    await uploadSingleFile(`[Voice] ${name}`, blobToSend, filename, mimeType);
+
+                    showToast('Đã gửi voice thành công! Cảm ơn bạn nhiều 💙', 'success');
+                    sendBtn.innerText = 'ĐÃ GỬI! ✅';
+                    sendBtn.style.background = 'var(--neon-green)';
+                    setTimeout(() => { sendBtn.innerText = originalText; sendBtn.style.background = ''; }, 2500);
+
+                    recordedBlob = null; uploadedFile = null;
+                    preview.hidden = true; preview.src = '';
+                    fileNameEl.innerText = ''; uploadInput.value = '';
+                    timerEl.hidden = true;
+                    recordBtn.innerText = '🎤 Bấm để thu âm';
+                    sendBtn.disabled = true;
+                } catch (err) {
+                    console.error(err);
+                    showToast(err.message || 'Gửi voice thất bại, thử lại nha!', 'error');
+                    sendBtn.disabled = false;
+                    sendBtn.innerText = originalText;
+                }
+            });
+        })();
+
+        // ---------------------------------------------------
+        // PANEL: VIDEO -> quay trực tiếp qua camera HOẶC chọn file có sẵn
+        // ---------------------------------------------------
+        (function initVideoPanel() {
+            const recordBtn = document.getElementById('videoRecordBtn');
+            const timerEl = document.getElementById('videoTimer');
+            const livePreview = document.getElementById('videoLivePreview');
+            const playback = document.getElementById('videoPlayback');
+            const uploadInput = document.getElementById('videoUpload');
+            const fileNameEl = document.getElementById('videoFileName');
+            const sendBtn = document.getElementById('videoSendBtn');
+            const nameInput = document.getElementById('cantcomeVideoName');
+            if (!recordBtn || !sendBtn) return;
+
+            let mediaRecorder = null, chunks = [], recordedBlob = null, uploadedFile = null;
+            let stream = null, timerInterval = null, seconds = 0;
+            const MAX_SECONDS = 90;
+
+            recordBtn.addEventListener('click', async () => {
+                if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); return; }
+
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                } catch (err) {
+                    console.error(err);
+                    if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+                        showToast('Bạn đã từ chối quyền camera/mic nên trình duyệt sẽ không tự hỏi lại nữa. Vào phần cài đặt của trình duyệt (bấm biểu tượng 🔒/ⓘ cạnh thanh địa chỉ) > Quyền của trang này > bật lại Camera & Micro, rồi tải lại trang thử nha! Không thì dùng nút "Chọn file video có sẵn" bên dưới cũng được.', 'error');
+                    } else if (err.name === 'NotFoundError') {
+                        showToast('Không tìm thấy camera/mic trên thiết bị này. Dùng nút "Chọn file video có sẵn" bên dưới nha!', 'error');
+                    } else {
+                        showToast('Không truy cập được camera/mic. Kiểm tra quyền trình duyệt nha!', 'error');
+                    }
+                    return;
+                }
+
+                playback.hidden = true;
+                livePreview.srcObject = stream;
+                livePreview.hidden = false;
+
+                chunks = [];
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    clearInterval(timerInterval);
+                    stream.getTracks().forEach(t => t.stop());
+                    livePreview.hidden = true;
+                    livePreview.srcObject = null;
+
+                    recordedBlob = new Blob(chunks, { type: 'video/webm' });
+                    uploadedFile = null;
+                    playback.src = URL.createObjectURL(recordedBlob);
+                    playback.hidden = false;
+                    fileNameEl.innerText = '';
+                    uploadInput.value = '';
+                    sendBtn.disabled = false;
+                    recordBtn.classList.remove('recording');
+                    recordBtn.innerText = '🎥 Quay lại';
+                };
+
+                mediaRecorder.start();
+                recordBtn.classList.add('recording');
+                recordBtn.innerText = '⏹ Dừng quay';
+                timerEl.hidden = false;
+                seconds = 0;
+                timerEl.innerText = '00:00';
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    timerEl.innerText = formatTime(seconds);
+                    if (seconds >= MAX_SECONDS) mediaRecorder.stop();
+                }, 1000);
+            });
+
+            uploadInput.addEventListener('change', () => {
+                const file = uploadInput.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('video/')) {
+                    showToast('File này không phải video nha (lỡ chọn nhầm ảnh/audio hả?). Chọn lại file video giúp mình!', 'error');
+                    uploadInput.value = '';
+                    return;
+                }
+                if (file.size > 50 * 1024 * 1024) {
+                    showToast('File nặng quá (trên 50MB). Chọn file nhẹ hơn xíu nha!', 'error');
+                    uploadInput.value = '';
+                    return;
+                }
+                uploadedFile = file;
+                recordedBlob = null;
+                fileNameEl.innerText = `Đã chọn: ${file.name}`;
+                livePreview.hidden = true;
+                playback.hidden = true;
+                sendBtn.disabled = false;
+            });
+
+            sendBtn.addEventListener('click', async () => {
+                const name = (nameInput.value.trim()) || (typeof getSavedGuestName === 'function' ? getSavedGuestName() : 'Ẩn danh');
+                const blobToSend = recordedBlob || uploadedFile;
+                if (!blobToSend) return;
+
+                const originalText = sendBtn.innerText;
+                sendBtn.disabled = true;
+                sendBtn.innerText = 'ĐANG GỬI...';
+
+                try {
+                    const filename = uploadedFile ? uploadedFile.name : `video-${Date.now()}.webm`;
+                    const mimeType = uploadedFile ? (uploadedFile.type || 'video/mp4') : 'video/webm';
+                    await uploadSingleFile(`[Video] ${name}`, blobToSend, filename, mimeType);
+
+                    showToast('Đã gửi video thành công! Cảm ơn bạn nhiều 💙', 'success');
+                    sendBtn.innerText = 'ĐÃ GỬI! ✅';
+                    sendBtn.style.background = 'var(--neon-green)';
+                    setTimeout(() => { sendBtn.innerText = originalText; sendBtn.style.background = ''; }, 2500);
+
+                    recordedBlob = null; uploadedFile = null;
+                    playback.hidden = true; playback.src = '';
+                    fileNameEl.innerText = ''; uploadInput.value = '';
+                    timerEl.hidden = true;
+                    recordBtn.innerText = '🎥 Bấm để quay video';
+                    sendBtn.disabled = true;
+                } catch (err) {
+                    console.error(err);
+                    showToast(err.message || 'Gửi video thất bại, thử lại nha!', 'error');
+                    sendBtn.disabled = false;
+                    sendBtn.innerText = originalText;
+                }
+            });
+        })();
+    })();
 });
+// =========================================================
+// KHÓA/MỞ SCROLL CỦA TRANG NỀN KHI MODAL MỞ/ĐÓNG
+// (Fix lỗi: cuộn hết nội dung trong modal rồi cuộn tiếp bị "tràn"
+// ra ngoài, cuộn luôn cả trang web phía sau lớp overlay.)
+// =========================================================
+let __scrollLockY = 0;
+function lockBodyScroll() {
+    if (document.body.classList.contains('modal-open-lock')) return; // đã khóa rồi
+    __scrollLockY = window.scrollY || window.pageYOffset || 0;
+    document.body.classList.add('modal-open-lock');
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${__scrollLockY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+}
+function unlockBodyScroll() {
+    if (!document.body.classList.contains('modal-open-lock')) return;
+    document.body.classList.remove('modal-open-lock');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, __scrollLockY);
+}
+function anyModalActive() {
+    return !!document.querySelector('.modal-overlay.active');
+}
+
 // =========================================================
 // HÀM ĐÓNG MODAL (THÔNG BÁO)
 // =========================================================
@@ -779,4 +1350,7 @@ window.closeModal = function(modalId) {
         const video = modal.querySelector('video');
         if (video) video.pause();
     }
+    // Chỉ mở khóa scroll khi KHÔNG còn modal nào khác đang mở (phòng trường hợp
+    // sau này có modal chồng modal).
+    if (!anyModalActive()) unlockBodyScroll();
 };
