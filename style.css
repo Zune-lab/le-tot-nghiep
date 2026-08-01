@@ -913,10 +913,10 @@ body::before {
 .super-special-guest-video-wrap {
     margin: 14px auto 0; border-radius: 14px; overflow: hidden;
     border: 3px solid var(--charcoal-black); box-shadow: 5px 5px 0 rgba(44, 53, 57, 0.15);
-    background: #000; max-width: 320px;
+    background: #000;
 }
 .super-special-guest-video {
-    display: block; width: 100%; aspect-ratio: 9 / 16; max-height: 65vh; background: #000; border: none;
+    display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 65vh; background: #000; border: none;
 }
 .super-special-guest-content .close-modal-btn { background: #C97B84; }
 .super-special-guest-content .close-modal-btn:active { background: #C97B84; }
