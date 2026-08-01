@@ -1,3 +1,22 @@
+// =========================================================
+// LAZY LOADER: tải 1 file <script> CDN đúng 1 lần, trả về Promise.
+// Dùng để trì hoãn supabase-js / mammoth / html2canvas cho tới khi
+// thật sự cần, thay vì nhúng cứng sẵn trong <head> làm chặn render.
+// =========================================================
+const __loadedScripts = new Map();
+function loadScriptOnce(src) {
+    if (__loadedScripts.has(src)) return __loadedScripts.get(src);
+    const p = new Promise((resolve, reject) => {
+        const tag = document.createElement('script');
+        tag.src = src;
+        tag.onload = () => resolve();
+        tag.onerror = () => reject(new Error('Không tải được script: ' + src));
+        document.head.appendChild(tag);
+    });
+    __loadedScripts.set(src, p);
+    return p;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     
     // =========================================================
@@ -5,7 +24,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     const SUPABASE_URL = 'https://hehaxyxalywtsiwwihzc.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlaGF4eXhhbHl3dHNpd3dpaHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0Nzk2MDIsImV4cCI6MjA5OTA1NTYwMn0.9RER8C6M1oNifiA2mi8FnlDjwHY6Y7iVYGVb4arQ5Bg'; 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // supabase-js giờ chỉ được tải khi thật sự cần gửi dữ liệu (RSVP/lời chúc),
+    // không load ngay lúc vào trang nữa.
+    let __supabaseClient = null;
+    async function getSupabase() {
+        if (__supabaseClient) return __supabaseClient;
+        await loadScriptOnce('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+        __supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        return __supabaseClient;
+    }
 
     const GOOGLE_DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbxTuMTeqhPyjgRB7VsuTpOEUQqKL8qH4l3zzheTGYSP1s6shkUiIDxoFdGa6BeguMwqPA/exec';
 
@@ -121,8 +149,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadSpecialGuests() {
-        if (typeof mammoth === 'undefined') {
-            console.warn('Thiếu thư viện mammoth.js, tắt easter egg special guest.');
+        try {
+            if (typeof mammoth === 'undefined') {
+                await loadScriptOnce('https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js');
+            }
+        } catch (e) {
+            console.warn('Không tải được thư viện mammoth.js, tắt easter egg special guest.', e);
             return;
         }
         try {
@@ -198,7 +230,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    loadSpecialGuests();
+    // Trì hoãn tới lúc trình duyệt rảnh (sau khi trang đã render xong) thay vì
+    // chạy ngay lúc DOMContentLoaded - tính năng easter egg không cần gấp,
+    // để băng thông/CPU ưu tiên cho việc hiện trang trước.
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => loadSpecialGuests(), { timeout: 3000 });
+    } else {
+        setTimeout(loadSpecialGuests, 1200);
+    }
 
     // Chỉ trigger easter egg khi khách RSVP ĐÚNG 1 MÌNH và tên đó khớp danh sách
     // special guest. Đi theo nhóm (nhiều tên) thì bỏ qua, không thông báo,
@@ -267,8 +306,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!letterEl) return;
 
             if (typeof html2canvas === 'undefined') {
-                showToast('Chưa tải được thư viện lưu ảnh, thử lại sau nha!', 'error');
-                return;
+                saveLetterBtn.disabled = true;
+                const originalLabelPreLoad = saveLetterBtn.textContent;
+                saveLetterBtn.textContent = 'ĐANG TẢI...';
+                try {
+                    await loadScriptOnce('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
+                } catch (e) {
+                    showToast('Chưa tải được thư viện lưu ảnh, thử lại sau nha!', 'error');
+                    saveLetterBtn.disabled = false;
+                    saveLetterBtn.textContent = originalLabelPreLoad;
+                    return;
+                }
+                saveLetterBtn.disabled = false;
+                saveLetterBtn.textContent = originalLabelPreLoad;
             }
 
             const originalLabel = saveLetterBtn.textContent;
@@ -841,6 +891,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const msg = rawMsg || "Không có lời nhắn";
 
             try {
+                const supabase = await getSupabase();
                 const { error } = await supabase
                     .from('rsvps')
                     .insert([{ guest_count: countNumber, guest_names: allNamesStr, message: msg }]);
@@ -1039,6 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 msgSendBtn.innerText = 'ĐANG GỬI...';
 
                 try {
+                    const supabase = await getSupabase();
                     const { error } = await supabase
                         .from('rsvps')
                         .insert([{ guest_count: 0, guest_names: name, message: msg }]);

@@ -32,11 +32,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@400;600;700&family=Special+Elite&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">  
     
     <link rel="stylesheet" href="style.css?v=9">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- mammoth.js: đọc trực tiếp file .docx (special-guest.docx) ngay trên trình duyệt -->
-    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
-    <!-- html2canvas: chụp thiệp special guest thành ảnh PNG để khách lưu về máy -->
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- supabase-js, mammoth.js, html2canvas: KHÔNG nhúng cứng ở đây nữa vì chúng
+         khá nặng và chặn render trang. script.js sẽ tự tải từng thư viện này
+         (bằng loadScriptOnce()) đúng lúc cần dùng: supabase khi submit form,
+         mammoth khi đọc special-guest.docx, html2canvas khi bấm "Lưu thư". -->
 </head>
 <body>
 
@@ -141,10 +140,10 @@
             <!-- Box 2: Countdown Timer -->
             <article class="bento-card box-countdown">
                 <!-- Ảnh số 2 (Bé bay) -->
-                <img src="pic/main4.webp" alt="Bao Anh 4" class="bento-person bento-p1">
+                <img loading="lazy" src="pic/main4.webp" alt="Bao Anh 4" class="bento-person bento-p1">
                 
-                <img src="pic/stickers/denim-08.png" alt="Button Sticker" class="bento-decor button-sticker">
-                <img src="pic/stickers/rocket.png" alt="Rocket" class="bento-decor countdown-rocket">
+                <img loading="lazy" src="pic/stickers/denim-08.png" alt="Button Sticker" class="bento-decor button-sticker">
+                <img loading="lazy" src="pic/stickers/rocket.png" alt="Rocket" class="bento-decor countdown-rocket">
                 <span class="peek-sticker peek-2 bubble-font">COUNTDOWN</span>
                 <div class="timer">
                     <div class="time-col"><span id="days" class="bubble-font">00</span><small>DAYS</small></div>
@@ -158,22 +157,22 @@
             <!-- Box 3: Contact Info -->
             <article class="bento-card box-contact">
                 <!-- Ảnh số 3 (Bé đứng) -->
-                <img src="pic/main3.webp" alt="Bao Anh 3" class="bento-person bento-p2">
+                <img loading="lazy" src="pic/main3.webp" alt="Bao Anh 3" class="bento-person bento-p2">
                 
-                <img src="pic/stickers/denim-01.png" alt="Exclamation" class="bento-decor exclamation-sticker">
+                <img loading="lazy" src="pic/stickers/denim-01.png" alt="Exclamation" class="bento-decor exclamation-sticker">
                 <span class="peek-sticker peek-1 bubble-font">CALL ME</span>
                 
                 <!-- Khu vực SĐT đã được kẹp thêm 2 bé sticker -->
                 <div class="contact-box">
                     <div class="phone-wrapper">
-                        <img src="pic/stickers/dog.png" alt="Chó" class="phone-icon dog-icon">
+                        <img loading="lazy" src="pic/stickers/dog.png" alt="Chó" class="phone-icon dog-icon">
                         <div class="phone-info">
                             <span class="phone-owner">Banh Đòn</span>
                             <a href="tel:0868481076" class="phone-link bubble-font">0868 481 076</a>
                         </div>
                     </div>
                     <div class="phone-wrapper">
-                        <img src="pic/stickers/girly-cat.png" alt="Mèo" class="phone-icon cat-icon">
+                        <img loading="lazy" src="pic/stickers/girly-cat.png" alt="Mèo" class="phone-icon cat-icon">
                         <div class="phone-info">
                             <a href="tel:0346262088" class="phone-link bubble-font">034 626 2088</a>
                             <span class="phone-owner">Ý Trinh</span>
@@ -184,7 +183,7 @@
 
             <!-- Box 4: Agenda Timeline -->
             <article class="bento-card box-agenda"> 
-                <img src="pic/stickers/denim-02.png" alt="Pin" class="bento-decor agenda-pin">
+                <img loading="lazy" src="pic/stickers/denim-02.png" alt="Pin" class="bento-decor agenda-pin">
                 <span class="peek-sticker peek-3 bubble-font">TIMELINE</span>
                 <div class="agenda-head">
                     <small>Cùng Banh đi qua 1 ngày nhá ^^</small>
@@ -210,9 +209,9 @@
 
             <!-- Box: Ghi chú gửi xe & liên hệ -->
             <article class="bento-card box-note">
-                <img src="pic/stickers/denim-10.png" alt="Heart" class="bento-decor note-heart-sticker">
-                <img src="pic/stickers/denim-03.png" alt="Star" class="bento-decor note-star-sticker">
-                <img src="pic/phone-call.png" alt="Phone call sticker" class="bento-decor note-phone-sticker">
+                <img loading="lazy" src="pic/stickers/denim-10.png" alt="Heart" class="bento-decor note-heart-sticker">
+                <img loading="lazy" src="pic/stickers/denim-03.png" alt="Star" class="bento-decor note-star-sticker">
+                <img loading="lazy" src="pic/phone-call.png" alt="Phone call sticker" class="bento-decor note-phone-sticker">
                 <div class="note-tape" aria-hidden="true"></div>
                 <p class="note-title">Note:</p>
                 <p class="note-line note-italic">Trai xinh gái đẹp nào mình đi xe thì GỬI XE tại cổng 06 Nguyễn Trãi, phường Chợ Quán, quận 5 nhen ❤ ✨</p>
@@ -223,11 +222,11 @@
             <!-- Box 5: RSVP Form -->
             <article class="bento-card box-rsvp">
                 <!-- 🚀 BÉ NGỒI ĐƯỢC CHỐT NHÀ Ở RSVP RỒI NHÉ -->
-                <img src="pic/main2.webp" alt="Bao Anh 2" class="bento-person bento-p3">
+                <img loading="lazy" src="pic/main2.webp" alt="Bao Anh 2" class="bento-person bento-p3">
 
-                <img src="pic/stickers/denim-03.png" alt="Star Sticker" class="bento-decor star-sticker">
-                <img src="pic/stickers/denim-11.png" alt="Flower Disc Sticker" class="bento-decor notepad-sticker">
-                <img src="pic/stickers/silly-cat.png" alt="Cat thumbs up" class="bento-decor rsvp-cat">
+                <img loading="lazy" src="pic/stickers/denim-03.png" alt="Star Sticker" class="bento-decor star-sticker">
+                <img loading="lazy" src="pic/stickers/denim-11.png" alt="Flower Disc Sticker" class="bento-decor notepad-sticker">
+                <img loading="lazy" src="pic/stickers/silly-cat.png" alt="Cat thumbs up" class="bento-decor rsvp-cat">
 
                 <div class="rsvp-title">
                     <h3 class="bubble-font"><span class="rc1">R</span><span class="rc2">S</span><span class="rc3">V</span><span class="rc4">P</span></h3>
@@ -259,10 +258,10 @@
 
             <!-- Box 6: Không đi được thì gửi lời chúc -->
             <article class="bento-card box-cantcome">
-                <img src="pic/stickers/denim-04.png" alt="Bow" class="bento-decor cantcome-bow-sticker">
-                <img src="pic/stickers/denim-09.png" alt="Stars" class="bento-decor cantcome-stars-sticker">
-                <img src="pic/pc2.png" alt="Gọi cho tớ nha" class="bento-decor cantcome-pc-left">
-                <img src="pic/pc3.png" alt="Gọi cho tớ nha" class="bento-decor cantcome-pc-right">
+                <img loading="lazy" src="pic/stickers/denim-04.png" alt="Bow" class="bento-decor cantcome-bow-sticker">
+                <img loading="lazy" src="pic/stickers/denim-09.png" alt="Stars" class="bento-decor cantcome-stars-sticker">
+                <img loading="lazy" src="pic/pc2.png" alt="Gọi cho tớ nha" class="bento-decor cantcome-pc-left">
+                <img loading="lazy" src="pic/pc3.png" alt="Gọi cho tớ nha" class="bento-decor cantcome-pc-right">
 
                 <div class="cantcome-title">
                     <h3 class="bubble-font">BẠN KHÔNG ĐI ĐƯỢC?</h3>
@@ -334,9 +333,9 @@
     <div id="success-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-tape" aria-hidden="true"></div>
-            <img src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
-            <img src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
-            <img src="pic/stickers/cat-note.png" alt="Mèo xác nhận" class="modal-icon">
+            <img loading="lazy" src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
+            <img loading="lazy" src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
+            <img loading="lazy" src="pic/stickers/cat-note.png" alt="Mèo xác nhận" class="modal-icon">
             <h3 class="bubble-font">CHỐT KÈO RỒI NHA! 🎓</h3>
             <p>Hẹn gặp bạn iu vào ngày 6.8 tại SGU nha 💙</p>
             <button class="close-modal-btn" onclick="closeModal('success-modal')">ĐÓNG</button>
@@ -347,9 +346,9 @@
     <div id="special-guest-modal" class="modal-overlay">
         <div class="modal-content special-guest-content">
             <div class="modal-tape" aria-hidden="true"></div>
-            <img src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
-            <img src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
-            <img src="pic/stickers/cat-note.png" alt="Mèo xác nhận" class="modal-icon">
+            <img loading="lazy" src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
+            <img loading="lazy" src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
+            <img loading="lazy" src="pic/stickers/cat-note.png" alt="Mèo xác nhận" class="modal-icon">
             <h3 class="bubble-font">SPECIAL GUEST ✨</h3>
             <p id="special-guest-message"></p>
             <div class="special-guest-actions">
@@ -363,8 +362,8 @@
     <div id="super-special-guest-modal" class="modal-overlay">
         <div class="modal-content super-special-guest-content">
             <div class="modal-tape" aria-hidden="true"></div>
-            <img src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
-            <img src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
+            <img loading="lazy" src="pic/stickers/denim-03.png" alt="" class="modal-corner-sticker modal-star" aria-hidden="true">
+            <img loading="lazy" src="pic/stickers/denim-10.png" alt="" class="modal-corner-sticker modal-heart" aria-hidden="true">
             <h3 class="bubble-font">Special gift 4 SUPER SPECIAL GUEST 💎✨</h3>
 
             <!-- Cổng mật khẩu: hiện trước, phải nhập đúng mã mới lộ video bên dưới -->
@@ -397,6 +396,6 @@
         <span class="footer-credit">made with <span class="footer-heart">💙</span> by <b>Zưn Nguỹn</b></span>
     </footer>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4" defer></script>
 </body>
 </html>
