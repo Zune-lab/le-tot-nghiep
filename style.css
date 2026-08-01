@@ -117,6 +117,7 @@ body::before {
 .hero-decor, .bento-decor {
     position: absolute; z-index: 3; pointer-events: none; 
     transition: transform 0.3s ease; animation: stickerFloat 4.5s ease-in-out infinite;
+    will-change: transform;
 }
 .hero-decor:nth-of-type(2n) { animation-duration: 5.5s; animation-delay: -1.2s; }
 .hero-decor:nth-of-type(3n) { animation-duration: 3.8s; animation-delay: -2.4s; }
@@ -156,6 +157,7 @@ body::before {
     pointer-events: auto;
     transition: transform 0.3s ease, opacity 0.3s ease;
     z-index: 4;
+    will-change: transform;
 }
 .scatter-item:hover { transform: scale(1.15) !important; z-index: 50; }
 
