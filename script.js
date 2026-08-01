@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     // 2. COUNTDOWN TIMER & MULTI-IMAGE DROP ZONE
     // =========================================================
-    const targetDate = new Date('August 6, 2025 11:00:00').getTime();
+    const targetDate = new Date('August 6, 2026 11:00:00').getTime();
 
     const updateTimer = () => {
         const now = new Date().getTime();
